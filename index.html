@@ -1,0 +1,3696 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark-midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusFlow — Personal Study Tracker & Productivity Platform</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    const twColorMix = (name) => `color-mix(in srgb, var(${name}) calc(100% * <alpha-value>), transparent)`;
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            bgBase: twColorMix('--bg-base'),
+            bgSurface: twColorMix('--bg-surface'),
+            bgElevated: twColorMix('--bg-elevated'),
+            borderSubtle: 'var(--border-subtle)',
+            textPrimary: twColorMix('--text-primary'),
+            textSecondary: twColorMix('--text-secondary'),
+            textMuted: twColorMix('--text-muted'),
+            accent: twColorMix('--accent'),
+            accentHover: twColorMix('--accent-hover'),
+            accentSoft: 'var(--accent-soft)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root, [data-theme="dark-midnight"] {
+      --bg-base: #0b0e14;
+      --bg-surface: #121722;
+      --bg-elevated: #19202e;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-soft: rgba(99, 102, 241, 0.14);
+      --bg-gradient: radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 45%);
+      --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    }
+
+    [data-theme="light-minimal"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-soft: rgba(79, 70, 229, 0.10);
+      --bg-gradient: radial-gradient(circle at top right, rgba(79, 70, 229, 0.06), transparent 45%);
+      --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    [data-theme="forest-green"] {
+      --bg-base: #0a1410;
+      --bg-surface: #111f19;
+      --bg-elevated: #172b22;
+      --border-subtle: rgba(52, 211, 153, 0.12);
+      --text-primary: #ecfdf5;
+      --text-secondary: #a7f3d0;
+      --text-muted: #6ee7b7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-soft: rgba(16, 185, 129, 0.16);
+      --bg-gradient: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 50%);
+      --card-shadow: 0 4px 22px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="ocean-blue"] {
+      --bg-base: #07131d;
+      --bg-surface: #0d1f2d;
+      --bg-elevated: #132c40;
+      --border-subtle: rgba(56, 189, 248, 0.12);
+      --text-primary: #f0f9ff;
+      --text-secondary: #bae6fd;
+      --text-muted: #7dd3fc;
+      --accent: #0ea5e9;
+      --accent-hover: #0284c7;
+      --accent-soft: rgba(14, 165, 233, 0.16);
+      --bg-gradient: radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 50%);
+      --card-shadow: 0 4px 22px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="sunset-orange"] {
+      --bg-base: #160d0b;
+      --bg-surface: #221411;
+      --bg-elevated: #2f1c18;
+      --border-subtle: rgba(251, 146, 60, 0.14);
+      --text-primary: #fff7ed;
+      --text-secondary: #fed7aa;
+      --text-muted: #fdba74;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --accent-soft: rgba(249, 115, 22, 0.16);
+      --bg-gradient: radial-gradient(circle at top right, rgba(249, 115, 22, 0.14), transparent 50%);
+      --card-shadow: 0 4px 22px -2px rgba(0, 0, 0, 0.45);
+    }
+
+    [data-theme="purple-dream"] {
+      --bg-base: #110b1c;
+      --bg-surface: #1a112b;
+      --bg-elevated: #25193d;
+      --border-subtle: rgba(192, 132, 252, 0.14);
+      --text-primary: #faf5ff;
+      --text-secondary: #e9d5ff;
+      --text-muted: #c084fc;
+      --accent: #a855f7;
+      --accent-hover: #9333ea;
+      --accent-soft: rgba(168, 85, 247, 0.16);
+      --bg-gradient: radial-gradient(circle at top right, rgba(168, 85, 247, 0.15), transparent 50%);
+      --card-shadow: 0 4px 22px -2px rgba(0, 0, 0, 0.45);
+    }
+
+    [data-theme="amoled-black"] {
+      --bg-base: #000000;
+      --bg-surface: #09090b;
+      --bg-elevated: #141417;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent: #22c55e;
+      --accent-hover: #16a34a;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --bg-gradient: none;
+      --card-shadow: none;
+    }
+
+    [data-theme="study-cafe"] {
+      --bg-base: #1c1613;
+      --bg-surface: #261e1a;
+      --bg-elevated: #332823;
+      --border-subtle: rgba(214, 184, 152, 0.14);
+      --text-primary: #fdf8f4;
+      --text-secondary: #e7d8c9;
+      --text-muted: #bfa893;
+      --accent: #d97706;
+      --accent-hover: #b45309;
+      --accent-soft: rgba(217, 119, 6, 0.18);
+      --bg-gradient: radial-gradient(circle at top right, rgba(217, 119, 6, 0.12), transparent 50%);
+      --card-shadow: 0 4px 22px -2px rgba(0, 0, 0, 0.45);
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--card-shadow);
+      border-radius: 1rem;
+      transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.25s ease;
+    }
+
+    .card-hover:hover {
+      border-color: var(--accent);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Range Slider Styling */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* View fade-in animation */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-view {
+      animation: fadeSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Print Styling for Study Reports */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      #sidebar, #mobile-header, #toast-container, #ambient-mini-bar, .no-print {
+        display: none !important;
+      }
+      #main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+      }
+      .card {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col lg:flex-row selection:bg-accent selection:text-white">
+
+  <!-- Mobile Top Header -->
+  <header id="mobile-header" class="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-bgSurface/90 backdrop-blur-md border-b border-borderSubtle">
+    <div class="flex items-center gap-2.5">
+      <button id="mobile-menu-btn" aria-label="Open menu" class="p-2 rounded-xl bg-bgElevated text-textPrimary hover:text-accent transition">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-white font-bold shadow-sm">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+        </div>
+        <span class="font-bold text-lg tracking-tight">FocusFlow</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openFocusOverlay()" class="px-3 py-1.5 rounded-xl bg-accentSoft text-accent text-xs font-semibold flex items-center gap-1.5">
+        <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Focus
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+  <!-- Collapsible Sidebar -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-bgSurface border-r border-borderSubtle flex flex-col justify-between transition-all duration-300 -translate-x-full lg:translate-x-0 shrink-0">
+    <div class="p-4 flex flex-col h-full overflow-y-auto">
+      <!-- Brand Header -->
+      <div class="flex items-center justify-between px-2 py-2 mb-5">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-9 h-9 rounded-xl bg-accent flex items-center justify-center text-white shrink-0 shadow-md">
+            <i data-lucide="flame" class="w-5 h-5"></i>
+          </div>
+          <div class="sidebar-label truncate">
+            <h1 class="font-bold text-lg tracking-tight leading-none">FocusFlow</h1>
+            <p class="text-[11px] text-textMuted mt-1 font-medium">Deep Work OS</p>
+          </div>
+        </div>
+        <button id="collapse-sidebar-btn" title="Toggle Sidebar" class="hidden lg:flex p-1.5 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-bgElevated transition">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
+        <button id="close-mobile-sidebar" class="lg:hidden p-1.5 rounded-lg text-textSecondary hover:text-textPrimary">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Primary Navigation -->
+      <nav class="space-y-1 flex-1" id="sidebar-nav">
+        <button data-view="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Dashboard</span>
+        </button>
+        <button data-view="timer" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="timer" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Focus Timer</span>
+        </button>
+        <button data-view="stopwatch" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="watch" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Stopwatch</span>
+        </button>
+        <button data-view="planner" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="check-square" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Study Planner</span>
+        </button>
+        <button data-view="subjects" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Subjects & Goals</span>
+        </button>
+        <button data-view="analytics" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Analytics & Reports</span>
+        </button>
+        <button data-view="calendar" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="calendar" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Study Calendar</span>
+        </button>
+        <button data-view="achievements" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Achievements</span>
+        </button>
+        <button data-view="sounds" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Focus Sounds</span>
+        </button>
+        <button data-view="settings" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition">
+          <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Settings</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Quick Focus & Level Pill -->
+      <div class="pt-4 mt-4 border-t border-borderSubtle space-y-3">
+        <button onclick="openFocusOverlay()" class="w-full py-2.5 px-3 rounded-xl bg-accent hover:bg-accentHover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition">
+          <i data-lucide="maximize-2" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label truncate">Focus Mode</span>
+        </button>
+
+        <div class="sidebar-label p-3 rounded-xl bg-bgElevated/80 border border-borderSubtle">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-textPrimary" id="sidebar-level-label">Level 1 Scholar</span>
+            <span class="text-accent font-mono font-semibold" id="sidebar-xp-label">0 XP</span>
+          </div>
+          <div class="w-full h-1.5 bg-bgBase rounded-full overflow-hidden">
+            <div id="sidebar-xp-bar" class="h-full bg-accent rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main id="main-content" class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto w-full pb-24">
+    <!-- Persistent Top Status Strip (Active Timer / Ambient Indicator) -->
+    <div id="live-status-strip" class="hidden mb-5 px-4 py-2.5 rounded-2xl bg-bgSurface border border-accent/40 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <div class="flex items-center gap-3">
+        <span class="w-2.5 h-2.5 rounded-full bg-accent animate-ping"></span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-accent" id="strip-mode-label">POMODORO FOCUS</span>
+        <span class="font-mono font-bold text-base text-textPrimary" id="strip-time-label">25:00</span>
+        <span class="text-xs text-textSecondary hidden sm:inline" id="strip-subject-label">• Computer Science</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="navigateTo('timer')" class="px-3 py-1 rounded-lg bg-bgElevated hover:bg-accentSoft text-xs font-medium text-textPrimary transition">Open Timer</button>
+        <button onclick="openFocusOverlay()" class="px-3 py-1 rounded-lg bg-accent text-white text-xs font-semibold transition">Fullscreen</button>
+      </div>
+    </div>
+
+    <!-- Dynamic View Container -->
+    <div id="view-container" class="animate-view"></div>
+  </main>
+
+  <!-- Floating Ambient Sound Mini-Player (Shown when audio is playing) -->
+  <div id="ambient-mini-bar" class="hidden fixed bottom-4 right-4 z-40 bg-bgSurface/95 backdrop-blur-md border border-borderSubtle rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3 max-w-sm">
+    <div class="w-9 h-9 rounded-xl bg-accentSoft text-accent flex items-center justify-center shrink-0">
+      <i data-lucide="volume-2" class="w-4 h-4"></i>
+    </div>
+    <div class="min-w-0 flex-1">
+      <p class="text-xs font-semibold text-textPrimary truncate" id="mini-sound-names">Rain & Fireplace</p>
+      <p class="text-[11px] text-textMuted">Ambient Soundscape Active</p>
+    </div>
+    <button onclick="toggleAllAmbientSounds()" id="mini-sound-toggle" class="p-2 rounded-xl bg-accent text-white hover:bg-accentHover transition" title="Pause/Resume Audio">
+      <i data-lucide="pause" class="w-4 h-4"></i>
+    </button>
+    <button onclick="navigateTo('sounds')" class="p-2 rounded-xl bg-bgElevated text-textSecondary hover:text-textPrimary transition" title="Sound Mixer">
+      <i data-lucide="sliders" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Fullscreen Distraction-Free Focus Mode Overlay -->
+  <div id="focus-overlay" class="fixed inset-0 z-50 hidden bg-bgBase flex-col justify-between p-6 sm:p-10 overflow-y-auto" style="background-image: var(--bg-gradient);">
+    <div class="flex items-center justify-between max-w-5xl mx-auto w-full">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-accent flex items-center justify-center text-white">
+          <i data-lucide="flame" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-widest text-accent">Deep Focus Mode</span>
+          <h2 class="text-sm font-medium text-textSecondary" id="overlay-subject-display">Computer Science</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleBrowserFullscreen()" class="p-2.5 rounded-xl bg-bgSurface border border-borderSubtle text-textSecondary hover:text-textPrimary transition" title="Toggle Browser Fullscreen">
+          <i data-lucide="expand" class="w-4 h-4"></i>
+        </button>
+        <button onclick="closeFocusOverlay()" class="px-4 py-2 rounded-xl bg-bgSurface border border-borderSubtle text-sm font-medium text-textPrimary hover:border-accent transition flex items-center gap-2">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i> Exit Focus
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Timer & Progress -->
+    <div class="my-auto py-8 flex flex-col items-center text-center max-w-2xl mx-auto w-full">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-bgSurface border border-borderSubtle text-xs font-semibold text-accent mb-6" id="overlay-mode-badge">
+        POMODORO FOCUS SESSION
+      </div>
+
+      <div class="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center mb-8">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 260 260">
+          <circle cx="130" cy="130" r="116" stroke="var(--bg-elevated)" stroke-width="10" fill="none" />
+          <circle id="overlay-progress-ring" cx="130" cy="130" r="116" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="728.85" stroke-dashoffset="0" class="transition-all duration-300" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span id="overlay-timer-display" class="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-textPrimary">25:00</span>
+          <span id="overlay-status-sub" class="text-xs text-textMuted mt-2 font-medium">Ready to begin</span>
+        </div>
+      </div>
+
+      <!-- Overlay Controls -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+        <button id="overlay-primary-btn" onclick="handleOverlayPrimaryAction()" class="px-8 py-3.5 rounded-2xl bg-accent hover:bg-accentHover text-white font-semibold text-base shadow-lg transition flex items-center gap-2">
+          <i data-lucide="play" class="w-5 h-5"></i> Start Session
+        </button>
+        <button onclick="handleOverlayResetAction()" class="px-5 py-3.5 rounded-2xl bg-bgSurface border border-borderSubtle hover:border-accent text-textPrimary font-medium text-sm transition flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+        </button>
+        <button id="overlay-finish-btn" onclick="handleOverlayFinishAction()" class="hidden px-5 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i> Finish & Save
+        </button>
+      </div>
+
+      <!-- Daily Quote inside Focus Mode -->
+      <p id="overlay-quote" class="text-sm sm:text-base italic text-textSecondary max-w-lg leading-relaxed"></p>
+    </div>
+
+    <!-- Bottom Ambient Sound Quick Controls -->
+    <div class="max-w-3xl mx-auto w-full bg-bgSurface/80 backdrop-blur-md border border-borderSubtle rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleAllAmbientSounds()" class="p-2.5 rounded-xl bg-accentSoft text-accent hover:bg-accent hover:text-white transition">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+        <div>
+          <p class="text-xs font-semibold text-textPrimary">Ambient Soundscape</p>
+          <p class="text-[11px] text-textMuted" id="overlay-sound-status">Click a quick sound to layer focus audio</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="quickToggleSound('rain')" class="overlay-sound-chip px-3 py-1.5 rounded-xl bg-bgElevated text-xs font-medium text-textSecondary hover:text-textPrimary transition" data-sound="rain">🌧️ Rain</button>
+        <button onclick="quickToggleSound('fireplace')" class="overlay-sound-chip px-3 py-1.5 rounded-xl bg-bgElevated text-xs font-medium text-textSecondary hover:text-textPrimary transition" data-sound="fireplace">🔥 Fireplace</button>
+        <button onclick="quickToggleSound('brownNoise')" class="overlay-sound-chip px-3 py-1.5 rounded-xl bg-bgElevated text-xs font-medium text-textSecondary hover:text-textPrimary transition" data-sound="brownNoise">🌊 Brown Noise</button>
+        <button onclick="quickToggleSound('cafe')" class="overlay-sound-chip px-3 py-1.5 rounded-xl bg-bgElevated text-xs font-medium text-textSecondary hover:text-textPrimary transition" data-sound="cafe">☕ Cafe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Modal Container (Confirmations, Day Details, Subject Edit) -->
+  <div id="custom-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
+    <div class="bg-bgSurface border border-borderSubtle rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-view" id="custom-modal-box">
+      <div class="flex items-center justify-between pb-3 border-b border-borderSubtle mb-4">
+        <h3 id="modal-title" class="text-lg font-bold text-textPrimary">Modal Title</h3>
+        <button onclick="closeModal()" class="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-bgElevated">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="text-sm text-textSecondary"></div>
+      <div id="modal-footer" class="mt-6 flex items-center justify-end gap-2.5"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
+  <script>
+    /**
+     * ============================================================================
+     * FOCUSFLOW — COMPLETE CLIENT-SIDE ARCHITECTURE
+     * Modular state management, timestamp-accurate timers, procedural Web Audio
+     * ambient sound synthesizer, analytics engine, and gamification system.
+     * ============================================================================
+     */
+
+    // ----------------------------------------------------------------------------
+    // 1. CONSTANTS, QUOTES & DEFAULT SEED DATA
+    // ----------------------------------------------------------------------------
+    const STORAGE_KEY = 'focusflow_platform_v1';
+
+    const MOTIVATIONAL_QUOTES = [
+      { text: "Focus is a matter of deciding what things you're not going to do.", author: "John Carmack" },
+      { text: "It is not that we have a short time to live, but that we waste a lot of it.", author: "Seneca" },
+      { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+      { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+      { text: "Deep work is the superpower of the 21st century.", author: "Cal Newport" },
+      { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+      { text: "Amateurs sit and wait for inspiration, the rest of us just get up and go to work.", author: "Stephen King" },
+      { text: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear" },
+      { text: "Concentrate every minute like a Roman on doing what is in front of you with precise and genuine seriousness.", author: "Marcus Aurelius" },
+      { text: "Small daily improvements over time lead to stunning results.", author: "Robin Sharma" }
+    ];
+
+    const THEMES = [
+      { id: 'dark-midnight', name: 'Dark Midnight', swatch: '#0b0e14', accent: '#6366f1' },
+      { id: 'light-minimal', name: 'Light Minimal', swatch: '#f8fafc', accent: '#4f46e5' },
+      { id: 'forest-green', name: 'Forest Green', swatch: '#0a1410', accent: '#10b981' },
+      { id: 'ocean-blue', name: 'Ocean Blue', swatch: '#07131d', accent: '#0ea5e9' },
+      { id: 'sunset-orange', name: 'Sunset Orange', swatch: '#160d0b', accent: '#f97316' },
+      { id: 'purple-dream', name: 'Purple Dream', swatch: '#110b1c', accent: '#a855f7' },
+      { id: 'amoled-black', name: 'AMOLED Black', swatch: '#000000', accent: '#22c55e' },
+      { id: 'study-cafe', name: 'Study Cafe', swatch: '#1c1613', accent: '#d97706' }
+    ];
+
+    const ACCENT_PRESETS = [
+      '#6366f1', '#10b981', '#0ea5e9', '#f97316', '#a855f7', '#ec4899', '#eab308', '#14b8a6'
+    ];
+
+    const DEFAULT_SUBJECTS = [
+      { id: 'sub_cs', name: 'Computer Science', color: '#6366f1', dailyTargetMinutes: 90 },
+      { id: 'sub_math', name: 'Mathematics', color: '#10b981', dailyTargetMinutes: 60 },
+      { id: 'sub_eng', name: 'English', color: '#0ea5e9', dailyTargetMinutes: 45 },
+      { id: 'sub_gov', name: 'Government Exam Preparation', color: '#f97316', dailyTargetMinutes: 120 },
+      { id: 'sub_dbms', name: 'Database Management', color: '#a855f7', dailyTargetMinutes: 60 },
+      { id: 'sub_prog', name: 'Programming', color: '#ec4899', dailyTargetMinutes: 90 }
+    ];
+
+    const ACHIEVEMENTS_LIST = [
+      { id: 'first_session', title: 'First Study Session', desc: 'Complete your very first tracked focus session.', icon: 'sparkles', xp: 100, check: (stats) => stats.totalSessions >= 1 },
+      { id: 'club_5h', title: '5-Hour Club', desc: 'Accumulate 5 hours of focused study time.', icon: 'clock', xp: 250, check: (stats) => stats.lifetimeHours >= 5 },
+      { id: 'club_10h', title: '10-Hour Club', desc: 'Accumulate 10 hours of focused study time.', icon: 'award', xp: 500, check: (stats) => stats.lifetimeHours >= 10 },
+      { id: 'streak_7', title: '7-Day Streak', desc: 'Maintain a consecutive 7-day study streak.', icon: 'flame', xp: 700, check: (stats) => stats.currentStreak >= 7 || stats.bestStreak >= 7 },
+      { id: 'streak_30', title: '30-Day Streak', desc: 'Study consistently for 30 consecutive days.', icon: 'zap', xp: 2000, check: (stats) => stats.currentStreak >= 30 || stats.bestStreak >= 30 },
+      { id: 'club_100h', title: '100 Study Hours', desc: 'Reach 100 lifetime hours of deep focus.', icon: 'medal', xp: 3000, check: (stats) => stats.lifetimeHours >= 100 },
+      { id: 'club_500h', title: '500 Study Hours', desc: 'Mastery milestone: 500 lifetime study hours.', icon: 'crown', xp: 10000, check: (stats) => stats.lifetimeHours >= 500 },
+      { id: 'club_1000h', title: '1000 Study Hours', desc: 'Legendary scholar: 1,000 lifetime study hours.', icon: 'star', xp: 25000, check: (stats) => stats.lifetimeHours >= 1000 }
+    ];
+
+    const AMBIENT_SOUNDS_CATALOG = [
+      { id: 'rain', name: 'Rain', emoji: '🌧️', category: 'Nature' },
+      { id: 'heavyRain', name: 'Heavy Rain', emoji: '⛈️', category: 'Nature' },
+      { id: 'thunderstorm', name: 'Thunderstorm', emoji: '⚡', category: 'Nature' },
+      { id: 'fireplace', name: 'Fireplace', emoji: '🔥', category: 'Cozy' },
+      { id: 'firecrackers', name: 'Firecrackers', emoji: '🧨', category: 'Ambience' },
+      { id: 'forestBirds', name: 'Forest Birds', emoji: '🐦', category: 'Nature' },
+      { id: 'oceanWaves', name: 'Ocean Waves', emoji: '🌊', category: 'Nature' },
+      { id: 'waterStream', name: 'Water Stream', emoji: '💧', category: 'Nature' },
+      { id: 'wind', name: 'Wind', emoji: '🍃', category: 'Nature' },
+      { id: 'whiteNoise', name: 'White Noise', emoji: '📻', category: 'Focus Noise' },
+      { id: 'brownNoise', name: 'Brown Noise', emoji: '🟤', category: 'Focus Noise' },
+      { id: 'pinkNoise', name: 'Pink Noise', emoji: '🌸', category: 'Focus Noise' },
+      { id: 'cafe', name: 'Cafe Background', emoji: '☕', category: 'Ambience' },
+      { id: 'keyboard', name: 'Keyboard Typing', emoji: '⌨️', category: 'Workspace' },
+      { id: 'nightCrickets', name: 'Night Crickets', emoji: '🦗', category: 'Nature' }
+    ];
+
+    // ----------------------------------------------------------------------------
+    // 2. DATE & TIMEZONE UTILITIES (Local YYYY-MM-DD safe)
+    // ----------------------------------------------------------------------------
+    function getLocalDateStr(dateObj = new Date()) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseLocalDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function addDays(dateStr, delta) {
+      const d = parseLocalDate(dateStr);
+      d.setDate(d.getDate() + delta);
+      return getLocalDateStr(d);
+    }
+
+    function formatDurationHuman(totalSeconds) {
+      const sec = Math.max(0, Math.floor(totalSeconds));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      if (h > 0) return `${h}h ${m}m`;
+      if (m > 0) return `${m}m`;
+      return `${sec}s`;
+    }
+
+    function formatClockMMSS(totalSeconds) {
+      const sec = Math.max(0, Math.ceil(totalSeconds));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function formatStopwatchHMS(ms) {
+      const totalMs = Math.max(0, Math.floor(ms));
+      const h = Math.floor(totalMs / 3600000);
+      const m = Math.floor((totalMs % 3600000) / 60000);
+      const s = Math.floor((totalMs % 60000) / 1000);
+      const cs = Math.floor((totalMs % 1000) / 10);
+      return {
+        main: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`,
+        ms: `.${String(cs).padStart(2, '0')}`
+      };
+    }
+
+    function formatTimeAMPM(isoString) {
+      if (!isoString) return '--:--';
+      const d = new Date(isoString);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ----------------------------------------------------------------------------
+    // 3. PERSISTENT STATE STORE (LocalStorage)
+    // ----------------------------------------------------------------------------
+    function getDefaultState() {
+      return {
+        profile: {
+          username: 'Scholar',
+          theme: 'dark-midnight',
+          customAccent: null,
+          sidebarCollapsed: false
+        },
+        goals: {
+          dailyMinutes: 180,     // 3 hours
+          weeklyMinutes: 1200,   // 20 hours
+          monthlyMinutes: 4800,  // 80 hours
+          longTermHours: 500
+        },
+        pomodoroSettings: {
+          focusMinutes: 25,
+          shortBreakMinutes: 5,
+          longBreakMinutes: 15,
+          autoTransition: false,
+          soundAlerts: true,
+          browserNotifications: true
+        },
+        subjects: [...DEFAULT_SUBJECTS],
+        sessions: [], // { id, date, startTime, endTime, durationSeconds, subjectId, mode, status }
+        tasks: [],    // { id, title, subjectId, deadline, priority, timeSlot, completed, createdAt }
+        soundPresets: [
+          { id: 'preset_rain_cafe', name: 'Rainy Study Cafe', volumes: { rain: 0.55, cafe: 0.45, fireplace: 0.25 } },
+          { id: 'preset_deep_brown', name: 'Deep Focus Cocoon', volumes: { brownNoise: 0.65, wind: 0.2 } },
+          { id: 'preset_forest_stream', name: 'Woodland Creek', volumes: { forestBirds: 0.5, waterStream: 0.55 } }
+        ],
+        unlockedAchievements: [],
+        bonusXp: 0,
+        claimedChallenges: []
+      };
+    }
+
+    let appState = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultState();
+        const parsed = JSON.parse(raw);
+        const def = getDefaultState();
+        return {
+          ...def,
+          ...parsed,
+          profile: { ...def.profile, ...(parsed.profile || {}) },
+          goals: { ...def.goals, ...(parsed.goals || {}) },
+          pomodoroSettings: { ...def.pomodoroSettings, ...(parsed.pomodoroSettings || {}) },
+          subjects: Array.isArray(parsed.subjects) && parsed.subjects.length ? parsed.subjects : def.subjects,
+          sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
+          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+          soundPresets: Array.isArray(parsed.soundPresets) ? parsed.soundPresets : def.soundPresets,
+          unlockedAchievements: Array.isArray(parsed.unlockedAchievements) ? parsed.unlockedAchievements : [],
+          claimedChallenges: Array.isArray(parsed.claimedChallenges) ? parsed.claimedChallenges : []
+        };
+      } catch (err) {
+        console.error('Failed to load FocusFlow state:', err);
+        return getDefaultState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.error('Failed to save FocusFlow state:', err);
+        showToast('Storage warning: Could not persist data to browser storage.', 'error');
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // 4. TIMESTAMP-ACCURATE POMODORO & STOPWATCH ENGINE
+    // ----------------------------------------------------------------------------
+    const timerRuntime = {
+      activeTool: 'pomodoro', // 'pomodoro' | 'stopwatch'
+      // Pomodoro state
+      pomoMode: 'focus', // 'focus' | 'shortBreak' | 'longBreak'
+      pomoDurationSec: appState.pomodoroSettings.focusMinutes * 60,
+      pomoRemainingSec: appState.pomodoroSettings.focusMinutes * 60,
+      pomoRunning: false,
+      pomoEndTimestamp: null,
+      pomoSessionStartISO: null,
+      pomoSubjectId: appState.subjects[0]?.id || 'sub_cs',
+      pomoCyclesCompleted: 0,
+
+      // Stopwatch state
+      swRunning: false,
+      swAccumulatedMs: 0,
+      swLastStartTimestamp: null,
+      swSessionStartISO: null,
+      swSubjectId: appState.subjects[0]?.id || 'sub_cs',
+      swSavedLock: false
+    };
+
+    let masterTickInterval = null;
+
+    function startMasterTick() {
+      if (masterTickInterval) return;
+      masterTickInterval = setInterval(() => {
+        const now = Date.now();
+
+        // 1. Update Pomodoro via endTimestamp delta
+        if (timerRuntime.pomoRunning && timerRuntime.pomoEndTimestamp) {
+          const remMs = timerRuntime.pomoEndTimestamp - now;
+          if (remMs <= 0) {
+            timerRuntime.pomoRemainingSec = 0;
+            timerRuntime.pomoRunning = false;
+            timerRuntime.pomoEndTimestamp = null;
+            handlePomodoroComplete();
+          } else {
+            timerRuntime.pomoRemainingSec = remMs / 1000;
+          }
+        }
+
+        // 2. Update UI clocks smoothly
+        updateLiveTimerDisplays();
+      }, 50);
+    }
+
+    // Pomodoro Actions
+    function setPomodoroMode(mode, customMinutes = null) {
+      if (timerRuntime.pomoRunning) {
+        pausePomodoro();
+      }
+      timerRuntime.pomoMode = mode;
+      let mins = appState.pomodoroSettings.focusMinutes;
+      if (mode === 'shortBreak') mins = appState.pomodoroSettings.shortBreakMinutes;
+      if (mode === 'longBreak') mins = appState.pomodoroSettings.longBreakMinutes;
+      if (customMinutes !== null && customMinutes > 0) mins = customMinutes;
+
+      timerRuntime.pomoDurationSec = Math.round(mins * 60);
+      timerRuntime.pomoRemainingSec = timerRuntime.pomoDurationSec;
+      timerRuntime.pomoSessionStartISO = null;
+      updateLiveTimerDisplays();
+      if (currentView === 'timer') renderView('timer');
+    }
+
+    function startPomodoro() {
+      if (timerRuntime.pomoRunning) return;
+      timerRuntime.activeTool = 'pomodoro';
+      if (!timerRuntime.pomoSessionStartISO) {
+        timerRuntime.pomoSessionStartISO = new Date().toISOString();
+      }
+      timerRuntime.pomoEndTimestamp = Date.now() + timerRuntime.pomoRemainingSec * 1000;
+      timerRuntime.pomoRunning = true;
+      requestBrowserNotificationPermission();
+      updateLiveTimerDisplays();
+      if (currentView === 'timer') renderView('timer');
+    }
+
+    function pausePomodoro() {
+      if (!timerRuntime.pomoRunning) return;
+      const remMs = Math.max(0, timerRuntime.pomoEndTimestamp - Date.now());
+      timerRuntime.pomoRemainingSec = remMs / 1000;
+      timerRuntime.pomoRunning = false;
+      timerRuntime.pomoEndTimestamp = null;
+      updateLiveTimerDisplays();
+      if (currentView === 'timer') renderView('timer');
+    }
+
+    function resetPomodoro() {
+      timerRuntime.pomoRunning = false;
+      timerRuntime.pomoEndTimestamp = null;
+      timerRuntime.pomoRemainingSec = timerRuntime.pomoDurationSec;
+      timerRuntime.pomoSessionStartISO = null;
+      updateLiveTimerDisplays();
+      if (currentView === 'timer') renderView('timer');
+    }
+
+    function handlePomodoroComplete() {
+      playCompletionChime();
+      const isFocus = timerRuntime.pomoMode === 'focus';
+
+      if (isFocus) {
+        const endISO = new Date().toISOString();
+        const startISO = timerRuntime.pomoSessionStartISO || new Date(Date.now() - timerRuntime.pomoDurationSec * 1000).toISOString();
+        recordCompletedSession({
+          startTime: startISO,
+          endTime: endISO,
+          durationSeconds: timerRuntime.pomoDurationSec,
+          subjectId: timerRuntime.pomoSubjectId,
+          mode: 'pomodoro'
+        });
+        timerRuntime.pomoCyclesCompleted += 1;
+        sendBrowserNotification('Focus Session Complete! 🎉', `Logged ${Math.round(timerRuntime.pomoDurationSec / 60)} minutes of focused study.`);
+
+        // Transition to break
+        const nextMode = timerRuntime.pomoCyclesCompleted % 4 === 0 ? 'longBreak' : 'shortBreak';
+        setPomodoroMode(nextMode);
+        if (appState.pomodoroSettings.autoTransition) {
+          startPomodoro();
+        }
+      } else {
+        // Break completed — NEVER count break time as study time
+        sendBrowserNotification('Break Finished!', 'Ready to jump back into your next focus block?');
+        showToast('Break complete! Ready for your next focus session.', 'info');
+        setPomodoroMode('focus');
+        if (appState.pomodoroSettings.autoTransition) {
+          startPomodoro();
+        }
+      }
+
+      if (currentView === 'timer' || currentView === 'dashboard') {
+        renderView(currentView);
+      }
+    }
+
+    // Stopwatch Actions
+    function getStopwatchElapsedMs() {
+      if (timerRuntime.swRunning && timerRuntime.swLastStartTimestamp) {
+        return timerRuntime.swAccumulatedMs + (Date.now() - timerRuntime.swLastStartTimestamp);
+      }
+      return timerRuntime.swAccumulatedMs;
+    }
+
+    function startStopwatch() {
+      if (timerRuntime.swRunning) return;
+      timerRuntime.activeTool = 'stopwatch';
+      if (!timerRuntime.swSessionStartISO) {
+        timerRuntime.swSessionStartISO = new Date().toISOString();
+      }
+      timerRuntime.swSavedLock = false;
+      timerRuntime.swLastStartTimestamp = Date.now();
+      timerRuntime.swRunning = true;
+      updateLiveTimerDisplays();
+      if (currentView === 'stopwatch') renderView('stopwatch');
+    }
+
+    function pauseStopwatch() {
+      if (!timerRuntime.swRunning) return;
+      timerRuntime.swAccumulatedMs += Date.now() - timerRuntime.swLastStartTimestamp;
+      timerRuntime.swLastStartTimestamp = null;
+      timerRuntime.swRunning = false;
+      updateLiveTimerDisplays();
+      if (currentView === 'stopwatch') renderView('stopwatch');
+    }
+
+    function resetStopwatch() {
+      timerRuntime.swRunning = false;
+      timerRuntime.swAccumulatedMs = 0;
+      timerRuntime.swLastStartTimestamp = null;
+      timerRuntime.swSessionStartISO = null;
+      timerRuntime.swSavedLock = false;
+      updateLiveTimerDisplays();
+      if (currentView === 'stopwatch') renderView('stopwatch');
+    }
+
+    function finishAndSaveStopwatch() {
+      if (timerRuntime.swSavedLock) return;
+      if (timerRuntime.swRunning) {
+        pauseStopwatch();
+      }
+      const elapsedSec = Math.floor(timerRuntime.swAccumulatedMs / 1000);
+      if (elapsedSec < 30) {
+        showToast('Sessions under 30 seconds are not recorded. Keep studying!', 'warning');
+        return;
+      }
+
+      // Safeguard against accidental/unattended runaway sessions (> 4 hours)
+      const MAX_SINGLE_SESSION_SEC = 4 * 3600;
+      if (elapsedSec > MAX_SINGLE_SESSION_SEC) {
+        openModal(
+          'Unusually Long Session Detected',
+          `<p class="mb-3">Your stopwatch ran for <strong>${formatDurationHuman(elapsedSec)}</strong>. To protect study integrity against unattended timers, sessions are capped at <strong>4 hours</strong> unless confirmed.</p>
+           <p>Would you like to log 4 hours (capped) or discard this session?</p>`,
+          `<button onclick="closeModal(); resetStopwatch();" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Discard</button>
+           <button onclick="closeModal(); commitStopwatchSession(${MAX_SINGLE_SESSION_SEC});" class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold">Log 4h 0m</button>`
+        );
+        return;
+      }
+
+      commitStopwatchSession(elapsedSec);
+    }
+
+    function commitStopwatchSession(durationSeconds) {
+      if (timerRuntime.swSavedLock) return;
+      timerRuntime.swSavedLock = true;
+      const endISO = new Date().toISOString();
+      const startISO = timerRuntime.swSessionStartISO || new Date(Date.now() - durationSeconds * 1000).toISOString();
+
+      recordCompletedSession({
+        startTime: startISO,
+        endTime: endISO,
+        durationSeconds,
+        subjectId: timerRuntime.swSubjectId,
+        mode: 'stopwatch'
+      });
+
+      resetStopwatch();
+      if (currentView === 'stopwatch' || currentView === 'dashboard') {
+        renderView(currentView);
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // 5. AUTOMATIC SESSION RECORDING & ANALYTICS ENGINE
+    // ----------------------------------------------------------------------------
+    function recordCompletedSession({ startTime, endTime, durationSeconds, subjectId, mode }) {
+      if (durationSeconds < 10) return;
+      const startDateObj = new Date(startTime);
+      const dateStr = getLocalDateStr(startDateObj);
+
+      // Duplicate protection check (same startTime & mode within 2s)
+      const isDuplicate = appState.sessions.some(
+        (s) => s.mode === mode && Math.abs(new Date(s.startTime).getTime() - startDateObj.getTime()) < 2000
+      );
+      if (isDuplicate) return;
+
+      const prevStats = computeStudyStats();
+      const newSession = {
+        id: 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        date: dateStr,
+        startTime,
+        endTime,
+        durationSeconds: Math.round(durationSeconds),
+        subjectId: subjectId || appState.subjects[0]?.id || 'sub_cs',
+        mode,
+        status: 'completed'
+      };
+
+      appState.sessions.unshift(newSession);
+      const newStats = computeStudyStats();
+
+      // Check Goal Achievement Notifications (daily / weekly / monthly / long-term)
+      const dailyTargetSec = appState.goals.dailyMinutes * 60;
+      let goalNotified = false;
+      if (prevStats.todaySeconds < dailyTargetSec && newStats.todaySeconds >= dailyTargetSec) {
+        showToast('🎯 Daily Study Goal Achieved! Amazing discipline!', 'success');
+        goalNotified = true;
+      }
+
+      const goalChecks = [
+        { label: 'Weekly', prev: prevStats.weeklySeconds, next: newStats.weeklySeconds, target: appState.goals.weeklyMinutes * 60 },
+        { label: 'Monthly', prev: prevStats.monthlySeconds, next: newStats.monthlySeconds, target: appState.goals.monthlyMinutes * 60 },
+        { label: 'Long-Term', prev: prevStats.lifetimeSeconds, next: newStats.lifetimeSeconds, target: appState.goals.longTermHours * 3600 }
+      ];
+      goalChecks.forEach((g) => {
+        if (g.target > 0 && g.prev < g.target && g.next >= g.target) {
+          showToast(`🏆 ${g.label} Study Goal Achieved! Keep the momentum going.`, 'success');
+          goalNotified = true;
+        }
+      });
+
+      if (!goalNotified) {
+        const subjName = getSubjectById(newSession.subjectId)?.name || 'Study';
+        showToast(`✅ Saved ${formatDurationHuman(newSession.durationSeconds)} of ${subjName}!`, 'success');
+      }
+
+      // Check & Unlock Achievements
+      checkAchievements(newStats);
+      saveState();
+      updateSidebarXP();
+    }
+
+    function getSubjectById(id) {
+      return appState.subjects.find((s) => s.id === id) || { id, name: 'General Study', color: '#6366f1', dailyTargetMinutes: 60 };
+    }
+
+    function computeStudyStats() {
+      const now = new Date();
+      const todayStr = getLocalDateStr(now);
+      const yesterdayStr = addDays(todayStr, -1);
+
+      // Start of current week (Monday)
+      const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+      const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const mondayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+      const mondayStr = getLocalDateStr(mondayDate);
+
+      const currentMonthPrefix = todayStr.slice(0, 7); // YYYY-MM
+      const currentYearPrefix = todayStr.slice(0, 4);  // YYYY
+
+      let todaySeconds = 0;
+      let yesterdaySeconds = 0;
+      let weeklySeconds = 0;
+      let monthlySeconds = 0;
+      let yearlySeconds = 0;
+      let lifetimeSeconds = 0;
+      let longestSessionSeconds = 0;
+
+      const byDate = {};
+      const bySubject = {};
+
+      for (const sess of appState.sessions) {
+        const dur = sess.durationSeconds || 0;
+        lifetimeSeconds += dur;
+        if (dur > longestSessionSeconds) longestSessionSeconds = dur;
+
+        byDate[sess.date] = (byDate[sess.date] || 0) + dur;
+        bySubject[sess.subjectId] = (bySubject[sess.subjectId] || 0) + dur;
+
+        if (sess.date === todayStr) todaySeconds += dur;
+        if (sess.date === yesterdayStr) yesterdaySeconds += dur;
+        if (sess.date >= mondayStr && sess.date <= todayStr) weeklySeconds += dur;
+        if (sess.date.startsWith(currentMonthPrefix)) monthlySeconds += dur;
+        if (sess.date.startsWith(currentYearPrefix)) yearlySeconds += dur;
+      }
+
+      // Current week 7-day breakdown (Mon -> Sun)
+      const currentWeekDays = [];
+      for (let i = 0; i < 7; i++) {
+        const dStr = addDays(mondayStr, i);
+        const dObj = parseLocalDate(dStr);
+        currentWeekDays.push({
+          date: dStr,
+          label: dObj.toLocaleDateString([], { weekday: 'short' }),
+          seconds: byDate[dStr] || 0
+        });
+      }
+
+      // Best productivity day
+      let bestDayDate = null;
+      let bestDaySeconds = 0;
+      Object.entries(byDate).forEach(([d, sec]) => {
+        if (sec > bestDaySeconds) {
+          bestDaySeconds = sec;
+          bestDayDate = d;
+        }
+      });
+
+      // Consecutive study-day streak (at least 1 minute studied counts as an active study day)
+      const activeDates = Object.keys(byDate).filter((d) => byDate[d] >= 60).sort();
+      let currentStreak = 0;
+      let cursor = byDate[todayStr] >= 60 ? todayStr : (byDate[yesterdayStr] >= 60 ? yesterdayStr : null);
+      if (cursor) {
+        while (byDate[cursor] && byDate[cursor] >= 60) {
+          currentStreak++;
+          cursor = addDays(cursor, -1);
+        }
+      }
+
+      // Best historical streak
+      let bestStreak = 0;
+      let tempStreak = 0;
+      let prevD = null;
+      for (const d of activeDates) {
+        if (prevD && addDays(prevD, 1) === d) {
+          tempStreak++;
+        } else {
+          tempStreak = 1;
+        }
+        if (tempStreak > bestStreak) bestStreak = tempStreak;
+        prevD = d;
+      }
+
+      // Averages
+      const totalActiveDays = Math.max(1, activeDates.length);
+      const avgDailySeconds = lifetimeSeconds > 0 ? Math.round(lifetimeSeconds / totalActiveDays) : 0;
+      const weeksSpan = Math.max(1, Math.ceil(totalActiveDays / 7));
+      const avgWeeklySeconds = lifetimeSeconds > 0 ? Math.round(lifetimeSeconds / weeksSpan) : 0;
+
+      // XP & Level Calculation (10 XP per minute + achievement XP + bonus XP)
+      const sessionXp = Math.floor(lifetimeSeconds / 6); // 10 XP per min
+      const achievementXp = appState.unlockedAchievements.reduce((acc, id) => {
+        const ach = ACHIEVEMENTS_LIST.find((a) => a.id === id);
+        return acc + (ach ? ach.xp : 0);
+      }, 0);
+      const totalXp = sessionXp + achievementXp + (appState.bonusXp || 0);
+      const level = Math.floor(Math.sqrt(totalXp / 250)) + 1;
+      const currentLevelBaseXp = Math.pow(level - 1, 2) * 250;
+      const nextLevelXp = Math.pow(level, 2) * 250;
+      const levelProgressPct = Math.min(100, Math.round(((totalXp - currentLevelBaseXp) / (nextLevelXp - currentLevelBaseXp)) * 100));
+
+      return {
+        todayStr,
+        todaySeconds,
+        yesterdaySeconds,
+        weeklySeconds,
+        monthlySeconds,
+        yearlySeconds,
+        lifetimeSeconds,
+        lifetimeHours: lifetimeSeconds / 3600,
+        totalSessions: appState.sessions.length,
+        longestSessionSeconds,
+        bestDayDate,
+        bestDaySeconds,
+        currentStreak,
+        bestStreak,
+        avgDailySeconds,
+        avgWeeklySeconds,
+        byDate,
+        bySubject,
+        currentWeekDays,
+        totalXp,
+        level,
+        levelProgressPct,
+        nextLevelXp
+      };
+    }
+
+    function checkAchievements(stats) {
+      let newlyUnlocked = false;
+      for (const ach of ACHIEVEMENTS_LIST) {
+        if (!appState.unlockedAchievements.includes(ach.id) && ach.check(stats)) {
+          appState.unlockedAchievements.push(ach.id);
+          newlyUnlocked = true;
+          showToast(`🏆 Achievement Unlocked: ${ach.title} (+${ach.xp} XP)!`, 'success');
+        }
+      }
+      if (newlyUnlocked) saveState();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 6. PROCEDURAL WEB AUDIO API AMBIENT SOUND ENGINE (15 SOUNDSCAPES)
+    // ----------------------------------------------------------------------------
+    class AmbientSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.masterVolume = 0.8;
+        this.isPaused = false;
+        this.activeNodes = {}; // soundId -> { gainNode, cleanupFn, volume }
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.value = this.masterVolume;
+          this.masterGain.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      createNoiseBuffer(type = 'white', durationSec = 4) {
+        const sampleRate = this.ctx.sampleRate;
+        const length = sampleRate * durationSec;
+        const buffer = this.ctx.createBuffer(1, length, sampleRate);
+        const data = buffer.getChannelData(0);
+
+        if (type === 'white') {
+          for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+        } else if (type === 'pink') {
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
+            b6 = white * 0.115926;
+          }
+        } else if (type === 'brown') {
+          let lastOut = 0;
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            data[i] = (lastOut + 0.02 * white) / 1.02;
+            lastOut = data[i];
+            data[i] *= 3.2;
+          }
+        }
+        return buffer;
+      }
+
+      startSound(id, volume = 0.5) {
+        this.initContext();
+        if (this.activeNodes[id]) {
+          this.setVolume(id, volume);
+          return;
+        }
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(Math.max(0.001, volume), this.ctx.currentTime + 0.35);
+        gainNode.connect(this.masterGain);
+
+        const timers = [];
+        const nodes = [];
+
+        const makeLoopedNoise = (noiseType, filterType, freq, q = 1, gainScale = 1) => {
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.createNoiseBuffer(noiseType, 4);
+          src.loop = true;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = filterType;
+          filter.frequency.value = freq;
+          filter.Q.value = q;
+
+          const subGain = this.ctx.createGain();
+          subGain.gain.value = gainScale;
+
+          src.connect(filter);
+          filter.connect(subGain);
+          subGain.connect(gainNode);
+          src.start();
+          nodes.push(src);
+          return { src, filter, subGain };
+        };
+
+        switch (id) {
+          case 'whiteNoise':
+            makeLoopedNoise('white', 'lowpass', 12000, 0.7, 0.28);
+            break;
+          case 'pinkNoise':
+            makeLoopedNoise('pink', 'lowpass', 8000, 0.7, 0.55);
+            break;
+          case 'brownNoise':
+            makeLoopedNoise('brown', 'lowpass', 900, 0.7, 0.65);
+            break;
+          case 'rain':
+            makeLoopedNoise('pink', 'bandpass', 1100, 0.6, 0.75);
+            makeLoopedNoise('white', 'highpass', 3500, 0.5, 0.14);
+            break;
+          case 'heavyRain':
+            makeLoopedNoise('pink', 'lowpass', 1800, 0.7, 0.9);
+            makeLoopedNoise('brown', 'lowpass', 400, 0.8, 0.5);
+            break;
+          case 'thunderstorm': {
+            makeLoopedNoise('pink', 'lowpass', 1500, 0.7, 0.8);
+            const triggerThunder = () => {
+              if (!this.activeNodes[id]) return;
+              const now = this.ctx.currentTime;
+              const rumble = this.ctx.createBufferSource();
+              rumble.buffer = this.createNoiseBuffer('brown', 4);
+              const lpf = this.ctx.createBiquadFilter();
+              lpf.type = 'lowpass';
+              lpf.frequency.setValueAtTime(140, now);
+              lpf.frequency.exponentialRampToValueAtTime(45, now + 3.2);
+
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.001, now);
+              env.gain.linearRampToValueAtTime(0.95, now + 0.25);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+
+              rumble.connect(lpf);
+              lpf.connect(env);
+              env.connect(gainNode);
+              rumble.start(now);
+              rumble.stop(now + 3.6);
+            };
+            triggerThunder();
+            timers.push(setInterval(triggerThunder, 9500));
+            break;
+          }
+          case 'fireplace': {
+            makeLoopedNoise('brown', 'lowpass', 220, 0.9, 0.6);
+            const crackleLoop = setInterval(() => {
+              if (!this.activeNodes[id] || Math.random() > 0.65) return;
+              const now = this.ctx.currentTime;
+              const osc = this.ctx.createBufferSource();
+              osc.buffer = this.createNoiseBuffer('white', 0.08);
+              const bpf = this.ctx.createBiquadFilter();
+              bpf.type = 'bandpass';
+              bpf.frequency.value = 1800 + Math.random() * 2500;
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.35 * Math.random(), now);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+              osc.connect(bpf);
+              bpf.connect(env);
+              env.connect(gainNode);
+              osc.start(now);
+            }, 140);
+            timers.push(crackleLoop);
+            break;
+          }
+          case 'firecrackers': {
+            const popLoop = setInterval(() => {
+              if (!this.activeNodes[id] || Math.random() > 0.55) return;
+              const now = this.ctx.currentTime;
+              const burst = this.ctx.createBufferSource();
+              burst.buffer = this.createNoiseBuffer('white', 0.12);
+              const hpf = this.ctx.createBiquadFilter();
+              hpf.type = 'highpass';
+              hpf.frequency.value = 900;
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.55, now);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+              burst.connect(hpf);
+              hpf.connect(env);
+              env.connect(gainNode);
+              burst.start(now);
+            }, 260);
+            timers.push(popLoop);
+            break;
+          }
+          case 'oceanWaves': {
+            const { filter, subGain } = makeLoopedNoise('pink', 'lowpass', 600, 0.8, 0.65);
+            const lfo = this.ctx.createOscillator();
+            lfo.frequency.value = 0.12; // ~8 second wave cycle
+            const lfoGain = this.ctx.createGain();
+            lfoGain.gain.value = 380;
+            lfo.connect(lfoGain);
+            lfoGain.connect(filter.frequency);
+            lfo.start();
+            nodes.push(lfo);
+            break;
+          }
+          case 'waterStream':
+            makeLoopedNoise('pink', 'bandpass', 950, 1.4, 0.7);
+            makeLoopedNoise('white', 'bandpass', 2400, 2.0, 0.2);
+            break;
+          case 'wind': {
+            const { filter } = makeLoopedNoise('pink', 'bandpass', 420, 2.8, 0.65);
+            const lfo = this.ctx.createOscillator();
+            lfo.frequency.value = 0.18;
+            const lfoGain = this.ctx.createGain();
+            lfoGain.gain.value = 220;
+            lfo.connect(lfoGain);
+            lfoGain.connect(filter.frequency);
+            lfo.start();
+            nodes.push(lfo);
+            break;
+          }
+          case 'forestBirds': {
+            makeLoopedNoise('pink', 'bandpass', 500, 0.5, 0.12);
+            const chirpLoop = setInterval(() => {
+              if (!this.activeNodes[id] || Math.random() > 0.55) return;
+              const now = this.ctx.currentTime;
+              const osc = this.ctx.createOscillator();
+              osc.type = 'sine';
+              const baseFreq = 2200 + Math.random() * 1400;
+              osc.frequency.setValueAtTime(baseFreq, now);
+              osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.35, now + 0.09);
+              osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.9, now + 0.18);
+
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.001, now);
+              env.gain.linearRampToValueAtTime(0.14, now + 0.03);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+              osc.connect(env);
+              env.connect(gainNode);
+              osc.start(now);
+              osc.stop(now + 0.21);
+            }, 1300);
+            timers.push(chirpLoop);
+            break;
+          }
+          case 'cafe': {
+            makeLoopedNoise('brown', 'bandpass', 380, 0.9, 0.65);
+            makeLoopedNoise('pink', 'bandpass', 850, 1.2, 0.35);
+            const clinkLoop = setInterval(() => {
+              if (!this.activeNodes[id] || Math.random() > 0.35) return;
+              const now = this.ctx.currentTime;
+              const osc = this.ctx.createOscillator();
+              osc.type = 'triangle';
+              osc.frequency.value = 3200 + Math.random() * 1200;
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.08, now);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+              osc.connect(env);
+              env.connect(gainNode);
+              osc.start(now);
+              osc.stop(now + 0.15);
+            }, 2400);
+            timers.push(clinkLoop);
+            break;
+          }
+          case 'keyboard': {
+            const typeLoop = setInterval(() => {
+              if (!this.activeNodes[id] || Math.random() > 0.72) return;
+              const now = this.ctx.currentTime;
+              const click = this.ctx.createBufferSource();
+              click.buffer = this.createNoiseBuffer('white', 0.04);
+              const bpf = this.ctx.createBiquadFilter();
+              bpf.type = 'bandpass';
+              bpf.frequency.value = 1400 + Math.random() * 900;
+              bpf.Q.value = 2.2;
+              const env = this.ctx.createGain();
+              env.gain.setValueAtTime(0.32, now);
+              env.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+              click.connect(bpf);
+              bpf.connect(env);
+              env.connect(gainNode);
+              click.start(now);
+            }, 145);
+            timers.push(typeLoop);
+            break;
+          }
+          case 'nightCrickets': {
+            const cricketLoop = setInterval(() => {
+              if (!this.activeNodes[id]) return;
+              const now = this.ctx.currentTime;
+              for (let p = 0; p < 3; p++) {
+                const t = now + p * 0.08;
+                const osc = this.ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 4250;
+                const env = this.ctx.createGain();
+                env.gain.setValueAtTime(0.001, t);
+                env.gain.linearRampToValueAtTime(0.09, t + 0.02);
+                env.gain.exponentialRampToValueAtTime(0.001, t + 0.065);
+                osc.connect(env);
+                env.connect(gainNode);
+                osc.start(t);
+                osc.stop(t + 0.07);
+              }
+            }, 1600);
+            timers.push(cricketLoop);
+            break;
+          }
+        }
+
+        this.activeNodes[id] = {
+          gainNode,
+          volume,
+          cleanup: () => {
+            timers.forEach((t) => clearInterval(t));
+            nodes.forEach((n) => {
+              try { n.stop(); n.disconnect(); } catch (e) {}
+            });
+            try { gainNode.disconnect(); } catch (e) {}
+          }
+        };
+
+        if (this.isPaused && this.ctx.state === 'running') {
+          this.isPaused = false;
+        }
+        updateAmbientUIState();
+      }
+
+      stopSound(id) {
+        const entry = this.activeNodes[id];
+        if (!entry) return;
+        entry.cleanup();
+        delete this.activeNodes[id];
+        updateAmbientUIState();
+      }
+
+      setVolume(id, volume) {
+        const entry = this.activeNodes[id];
+        if (!entry) return;
+        entry.volume = volume;
+        if (this.ctx) {
+          entry.gainNode.gain.setTargetAtTime(Math.max(0.0001, volume), this.ctx.currentTime, 0.05);
+        }
+      }
+
+      setMasterVolume(vol) {
+        this.masterVolume = vol;
+        if (this.masterGain && this.ctx) {
+          this.masterGain.gain.setTargetAtTime(Math.max(0.0001, vol), this.ctx.currentTime, 0.05);
+        }
+      }
+
+      togglePauseAll() {
+        if (!this.ctx) return;
+        if (this.ctx.state === 'running') {
+          this.ctx.suspend();
+          this.isPaused = true;
+        } else {
+          this.ctx.resume();
+          this.isPaused = false;
+        }
+        updateAmbientUIState();
+      }
+
+      stopAll() {
+        Object.keys(this.activeNodes).forEach((id) => this.stopSound(id));
+      }
+
+      applyPreset(volumesMap) {
+        this.stopAll();
+        Object.entries(volumesMap).forEach(([soundId, vol]) => {
+          if (vol > 0) this.startSound(soundId, vol);
+        });
+        if (currentView === 'sounds') renderView('sounds');
+      }
+    }
+
+    const soundEngine = new AmbientSoundEngine();
+
+    function quickToggleSound(soundId) {
+      if (soundEngine.activeNodes[soundId]) {
+        soundEngine.stopSound(soundId);
+      } else {
+        soundEngine.startSound(soundId, 0.55);
+      }
+      if (currentView === 'sounds') renderView('sounds');
+    }
+
+    function toggleAllAmbientSounds() {
+      soundEngine.togglePauseAll();
+    }
+
+    function updateAmbientUIState() {
+      const activeIds = Object.keys(soundEngine.activeNodes);
+      const miniBar = document.getElementById('ambient-mini-bar');
+      const miniNames = document.getElementById('mini-sound-names');
+      const miniToggle = document.getElementById('mini-sound-toggle');
+      const overlayStatus = document.getElementById('overlay-sound-status');
+
+      if (activeIds.length === 0) {
+        miniBar.classList.add('hidden');
+        if (overlayStatus) overlayStatus.textContent = 'Click a quick sound to layer focus audio';
+      } else {
+        miniBar.classList.remove('hidden');
+        const names = activeIds
+          .map((id) => AMBIENT_SOUNDS_CATALOG.find((s) => s.id === id)?.name || id)
+          .join(' • ');
+        miniNames.textContent = names;
+        if (overlayStatus) overlayStatus.textContent = `Playing: ${names}`;
+        miniToggle.innerHTML = soundEngine.isPaused
+          ? `<i data-lucide="play" class="w-4 h-4"></i>`
+          : `<i data-lucide="pause" class="w-4 h-4"></i>`;
+        lucide.createIcons();
+      }
+
+      // Highlight overlay sound chips
+      document.querySelectorAll('.overlay-sound-chip').forEach((chip) => {
+        const sId = chip.getAttribute('data-sound');
+        if (soundEngine.activeNodes[sId]) {
+          chip.classList.add('bg-accent', 'text-white');
+          chip.classList.remove('bg-bgElevated', 'text-textSecondary');
+        } else {
+          chip.classList.remove('bg-accent', 'text-white');
+          chip.classList.add('bg-bgElevated', 'text-textSecondary');
+        }
+      });
+    }
+
+    // Pleasant Web Audio API Chime when Pomodoro Completes
+    function playCompletionChime() {
+      if (!appState.pomodoroSettings.soundAlerts) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const start = ctx.currentTime + idx * 0.14;
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.linearRampToValueAtTime(0.22, start + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.7);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.75);
+        });
+      } catch (e) {}
+    }
+
+    // Browser Notifications
+    function requestBrowserNotificationPermission() {
+      if (!appState.pomodoroSettings.browserNotifications) return;
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function sendBrowserNotification(title, body) {
+      if (!appState.pomodoroSettings.browserNotifications) return;
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body });
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // 7. THEME & APPEARANCE CONTROLLER
+    // ----------------------------------------------------------------------------
+    function applyTheme(themeId, customAccent = null) {
+      document.documentElement.setAttribute('data-theme', themeId);
+      appState.profile.theme = themeId;
+
+      if (customAccent !== undefined) {
+        appState.profile.customAccent = customAccent;
+      }
+
+      if (appState.profile.customAccent) {
+        document.documentElement.style.setProperty('--accent', appState.profile.customAccent);
+        document.documentElement.style.setProperty('--accent-hover', appState.profile.customAccent);
+        document.documentElement.style.setProperty('--accent-soft', hexToRgba(appState.profile.customAccent, 0.15));
+      } else {
+        document.documentElement.style.removeProperty('--accent');
+        document.documentElement.style.removeProperty('--accent-hover');
+        document.documentElement.style.removeProperty('--accent-soft');
+      }
+      saveState();
+    }
+
+    function hexToRgba(hex, alpha) {
+      const clean = hex.replace('#', '');
+      const bigint = parseInt(clean, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // ----------------------------------------------------------------------------
+    // 8. LIVE DISPLAY UPDATER (Runs every 50ms without full DOM re-render)
+    // ----------------------------------------------------------------------------
+    function updateLiveTimerDisplays() {
+      const strip = document.getElementById('live-status-strip');
+      const stripMode = document.getElementById('strip-mode-label');
+      const stripTime = document.getElementById('strip-time-label');
+      const stripSubj = document.getElementById('strip-subject-label');
+
+      const anyRunning = timerRuntime.pomoRunning || timerRuntime.swRunning;
+      if (anyRunning) {
+        strip.classList.remove('hidden');
+        if (timerRuntime.pomoRunning) {
+          stripMode.textContent = timerRuntime.pomoMode === 'focus' ? 'POMODORO FOCUS' : 'BREAK TIME';
+          stripTime.textContent = formatClockMMSS(timerRuntime.pomoRemainingSec);
+          stripSubj.textContent = `• ${getSubjectById(timerRuntime.pomoSubjectId).name}`;
+        } else {
+          stripMode.textContent = 'STOPWATCH';
+          stripTime.textContent = formatStopwatchHMS(getStopwatchElapsedMs()).main;
+          stripSubj.textContent = `• ${getSubjectById(timerRuntime.swSubjectId).name}`;
+        }
+      } else {
+        strip.classList.add('hidden');
+      }
+
+      // Pomodoro DOM nodes if visible
+      const pomoDisplay = document.getElementById('pomo-clock-text');
+      const pomoRing = document.getElementById('pomo-progress-ring');
+      if (pomoDisplay) {
+        pomoDisplay.textContent = formatClockMMSS(timerRuntime.pomoRemainingSec);
+      }
+      if (pomoRing) {
+        const circumference = 728.85;
+        const pct = timerRuntime.pomoDurationSec > 0
+          ? timerRuntime.pomoRemainingSec / timerRuntime.pomoDurationSec
+          : 1;
+        pomoRing.style.strokeDashoffset = circumference * (1 - pct);
+      }
+
+      // Stopwatch DOM nodes if visible
+      const swMain = document.getElementById('sw-clock-main');
+      const swMs = document.getElementById('sw-clock-ms');
+      if (swMain && swMs) {
+        const formatted = formatStopwatchHMS(getStopwatchElapsedMs());
+        swMain.textContent = formatted.main;
+        swMs.textContent = formatted.ms;
+      }
+
+      // Fullscreen Focus Overlay synchronization
+      const overlay = document.getElementById('focus-overlay');
+      if (overlay && !overlay.classList.contains('hidden')) {
+        syncFocusOverlayUI();
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // 9. FULLSCREEN FOCUS MODE OVERLAY CONTROLLERS
+    // ----------------------------------------------------------------------------
+    function openFocusOverlay() {
+      const overlay = document.getElementById('focus-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      const quote = getDailyQuote();
+      document.getElementById('overlay-quote').textContent = `“${quote.text}” — ${quote.author}`;
+      syncFocusOverlayUI();
+      updateAmbientUIState();
+      lucide.createIcons();
+    }
+
+    function closeFocusOverlay() {
+      const overlay = document.getElementById('focus-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function toggleBrowserFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function syncFocusOverlayUI() {
+      const isStopwatch = timerRuntime.activeTool === 'stopwatch' || currentView === 'stopwatch';
+      const badge = document.getElementById('overlay-mode-badge');
+      const subjDisplay = document.getElementById('overlay-subject-display');
+      const timerDisplay = document.getElementById('overlay-timer-display');
+      const subDisplay = document.getElementById('overlay-status-sub');
+      const primaryBtn = document.getElementById('overlay-primary-btn');
+      const finishBtn = document.getElementById('overlay-finish-btn');
+      const ring = document.getElementById('overlay-progress-ring');
+      let primaryHTML = '';
+      let finishVisible = false;
+
+      if (isStopwatch) {
+        badge.textContent = 'STOPWATCH DEEP WORK';
+        subjDisplay.textContent = getSubjectById(timerRuntime.swSubjectId).name;
+        const elapsed = getStopwatchElapsedMs();
+        const fmt = formatStopwatchHMS(elapsed);
+        timerDisplay.textContent = fmt.main;
+        subDisplay.textContent = timerRuntime.swRunning ? 'Recording focused study time...' : (elapsed > 0 ? 'Paused' : 'Ready to track');
+        primaryHTML = timerRuntime.swRunning
+          ? `<i data-lucide="pause" class="w-5 h-5"></i> Pause`
+          : `<i data-lucide="play" class="w-5 h-5"></i> ${elapsed > 0 ? 'Resume' : 'Start'}`;
+        finishVisible = elapsed >= 30000;
+
+        // Animate ring smoothly every 60s
+        const secMod = (elapsed / 1000) % 60;
+        ring.style.strokeDashoffset = 728.85 * (1 - secMod / 60);
+      } else {
+        const modeTitles = { focus: 'POMODORO FOCUS SESSION', shortBreak: 'SHORT BREAK', longBreak: 'LONG BREAK' };
+        badge.textContent = modeTitles[timerRuntime.pomoMode] || 'POMODORO';
+        subjDisplay.textContent = getSubjectById(timerRuntime.pomoSubjectId).name;
+        timerDisplay.textContent = formatClockMMSS(timerRuntime.pomoRemainingSec);
+        subDisplay.textContent = timerRuntime.pomoRunning ? 'Stay locked in — distraction free' : 'Paused / Ready';
+        const idleLabel = timerRuntime.pomoMode === 'focus' ? 'Start Focus' : (timerRuntime.pomoMode === 'shortBreak' ? 'Start Break' : 'Start Long Break');
+        primaryHTML = timerRuntime.pomoRunning
+          ? `<i data-lucide="pause" class="w-5 h-5"></i> Pause`
+          : `<i data-lucide="play" class="w-5 h-5"></i> ${timerRuntime.pomoRemainingSec < timerRuntime.pomoDurationSec ? 'Resume' : idleLabel}`;
+
+        const pct = timerRuntime.pomoDurationSec > 0 ? timerRuntime.pomoRemainingSec / timerRuntime.pomoDurationSec : 1;
+        ring.style.strokeDashoffset = 728.85 * (1 - pct);
+      }
+
+      if (primaryBtn.dataset.html !== primaryHTML) {
+        primaryBtn.dataset.html = primaryHTML;
+        primaryBtn.innerHTML = primaryHTML;
+        lucide.createIcons();
+      }
+      if (finishVisible) finishBtn.classList.remove('hidden');
+      else finishBtn.classList.add('hidden');
+    }
+
+    function handleOverlayPrimaryAction() {
+      const isStopwatch = timerRuntime.activeTool === 'stopwatch' || currentView === 'stopwatch';
+      if (isStopwatch) {
+        timerRuntime.swRunning ? pauseStopwatch() : startStopwatch();
+      } else {
+        timerRuntime.pomoRunning ? pausePomodoro() : startPomodoro();
+      }
+      syncFocusOverlayUI();
+    }
+
+    function handleOverlayResetAction() {
+      const isStopwatch = timerRuntime.activeTool === 'stopwatch' || currentView === 'stopwatch';
+      isStopwatch ? resetStopwatch() : resetPomodoro();
+      syncFocusOverlayUI();
+    }
+
+    function handleOverlayFinishAction() {
+      finishAndSaveStopwatch();
+      syncFocusOverlayUI();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 10. UI HELPERS: TOASTS, MODALS, GREETING & QUOTES
+    // ----------------------------------------------------------------------------
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'border-emerald-500/50 bg-bgSurface text-textPrimary',
+        error: 'border-rose-500/50 bg-bgSurface text-textPrimary',
+        warning: 'border-amber-500/50 bg-bgSurface text-textPrimary',
+        info: 'border-accent/50 bg-bgSurface text-textPrimary'
+      };
+      const icons = {
+        success: 'check-circle-2',
+        error: 'alert-circle',
+        warning: 'alert-triangle',
+        info: 'info'
+      };
+      const iconColors = {
+        success: 'text-emerald-400',
+        error: 'text-rose-400',
+        warning: 'text-amber-400',
+        info: 'text-accent'
+      };
+
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-2xl border shadow-xl backdrop-blur-md animate-view ${colors[type] || colors.info}`;
+      el.innerHTML = `
+        <i data-lucide="${icons[type] || 'info'}" class="w-5 h-5 shrink-0 mt-0.5 ${iconColors[type] || iconColors.info}"></i>
+        <p class="text-xs sm:text-sm font-medium leading-snug flex-1">${message}</p>
+      `;
+      container.appendChild(el);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(12px)';
+        el.style.transition = 'all 0.25s ease';
+        setTimeout(() => el.remove(), 260);
+      }, 3800);
+    }
+
+    function openModal(title, bodyHTML, footerHTML = '') {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = bodyHTML;
+      document.getElementById('modal-footer').innerHTML = footerHTML;
+      const modal = document.getElementById('custom-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('custom-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'Good morning';
+      if (hour < 18) return 'Good afternoon';
+      return 'Good evening';
+    }
+
+    function getDailyQuote() {
+      const dayIndex = Math.floor(Date.now() / 86400000) % MOTIVATIONAL_QUOTES.length;
+      return MOTIVATIONAL_QUOTES[dayIndex];
+    }
+
+    function updateSidebarXP() {
+      const stats = computeStudyStats();
+      const lvlEl = document.getElementById('sidebar-level-label');
+      const xpEl = document.getElementById('sidebar-xp-label');
+      const barEl = document.getElementById('sidebar-xp-bar');
+      if (lvlEl) lvlEl.textContent = `Level ${stats.level} Scholar`;
+      if (xpEl) xpEl.textContent = `${stats.totalXp.toLocaleString()} XP`;
+      if (barEl) barEl.style.width = `${stats.levelProgressPct}%`;
+    }
+
+    // ----------------------------------------------------------------------------
+    // 11. NAVIGATION & VIEW ROUTER
+    // ----------------------------------------------------------------------------
+    let currentView = 'dashboard';
+    let activeCharts = [];
+    let analyticsRangeDays = 7;
+    let calendarMonthDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let plannerFilter = 'today';
+
+    function destroyActiveCharts() {
+      activeCharts.forEach((c) => {
+        try { c.destroy(); } catch (e) {}
+      });
+      activeCharts = [];
+    }
+
+    function navigateTo(view) {
+      currentView = view;
+      // Close mobile drawer if open
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.add('hidden');
+
+      // Highlight active sidebar button
+      document.querySelectorAll('.nav-item').forEach((btn) => {
+        if (btn.getAttribute('data-view') === view) {
+          btn.classList.add('bg-accentSoft', 'text-accent', 'font-semibold');
+          btn.classList.remove('text-textSecondary', 'hover:bg-bgElevated', 'hover:text-textPrimary');
+        } else {
+          btn.classList.remove('bg-accentSoft', 'text-accent', 'font-semibold');
+          btn.classList.add('text-textSecondary', 'hover:bg-bgElevated', 'hover:text-textPrimary');
+        }
+      });
+
+      renderView(view);
+    }
+
+    function renderView(view) {
+      destroyActiveCharts();
+      const container = document.getElementById('view-container');
+      container.classList.remove('animate-view');
+      void container.offsetWidth;
+      container.classList.add('animate-view');
+
+      switch (view) {
+        case 'dashboard': renderDashboardView(container); break;
+        case 'timer': renderTimerView(container); break;
+        case 'stopwatch': renderStopwatchView(container); break;
+        case 'planner': renderPlannerView(container); break;
+        case 'subjects': renderSubjectsView(container); break;
+        case 'analytics': renderAnalyticsView(container); break;
+        case 'calendar': renderCalendarView(container); break;
+        case 'achievements': renderAchievementsView(container); break;
+        case 'sounds': renderSoundsView(container); break;
+        case 'settings': renderSettingsView(container); break;
+        default: renderDashboardView(container);
+      }
+
+      lucide.createIcons();
+      updateLiveTimerDisplays();
+      updateSidebarXP();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 12. VIEW RENDERERS
+    // ----------------------------------------------------------------------------
+
+    // === VIEW 1: DASHBOARD ===
+    function renderDashboardView(container) {
+      const stats = computeStudyStats();
+      const quote = getDailyQuote();
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const dailyGoalSec = appState.goals.dailyMinutes * 60;
+      const dailyPct = Math.min(100, Math.round((stats.todaySeconds / Math.max(1, dailyGoalSec)) * 100));
+      const ringCircumference = 251.32;
+      const ringOffset = ringCircumference * (1 - dailyPct / 100);
+
+      const recentSessions = appState.sessions.slice(0, 6);
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Top Greeting & Quick Start Header -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-accent mb-1">${formattedDate}</p>
+              <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-textPrimary">${getGreeting()}, ${escapeHtml(appState.profile.username)}.</h1>
+              <p class="text-xs sm:text-sm text-textSecondary mt-1 italic">“${quote.text}” — <span class="font-medium">${quote.author}</span></p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button onclick="navigateTo('timer'); startPomodoro();" class="px-4 py-2.5 rounded-xl bg-accent hover:bg-accentHover text-white text-sm font-semibold shadow-sm transition flex items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Quick Start 25m Focus
+              </button>
+              <button onclick="navigateTo('stopwatch')" class="px-4 py-2.5 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-textPrimary text-sm font-medium transition flex items-center gap-2">
+                <i data-lucide="watch" class="w-4 h-4"></i> Stopwatch
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <!-- Today's Study + Circular Goal Ring -->
+            <div class="card p-5 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-textSecondary">Today's Study Time</p>
+                <p class="text-2xl font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.todaySeconds)}</p>
+                <p class="text-xs text-textMuted mt-1">Goal: ${formatDurationHuman(dailyGoalSec)} (${dailyPct}%)</p>
+              </div>
+              <div class="relative w-16 h-16 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 92 92">
+                  <circle cx="46" cy="46" r="40" stroke="var(--bg-elevated)" stroke-width="8" fill="none" />
+                  <circle cx="46" cy="46" r="40" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="${ringCircumference}" stroke-dashoffset="${ringOffset}" />
+                </svg>
+                <span class="absolute text-xs font-bold font-mono text-textPrimary">${dailyPct}%</span>
+              </div>
+            </div>
+
+            <!-- Current Study Streak -->
+            <div class="card p-5 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-textSecondary">Current Study Streak</p>
+                <p class="text-2xl font-bold font-mono text-textPrimary mt-1">${stats.currentStreak} ${stats.currentStreak === 1 ? 'Day' : 'Days'}</p>
+                <p class="text-xs text-textMuted mt-1">Best streak: ${stats.bestStreak} days</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                <i data-lucide="flame" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <!-- Weekly Study Stats -->
+            <div class="card p-5 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-textSecondary">This Week's Focus</p>
+                <p class="text-2xl font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.weeklySeconds)}</p>
+                <p class="text-xs text-textMuted mt-1">Yesterday: ${formatDurationHuman(stats.yesterdaySeconds)}</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-accentSoft text-accent flex items-center justify-center shrink-0">
+                <i data-lucide="calendar-range" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <!-- Lifetime Hours & Sessions -->
+            <div class="card p-5 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-textSecondary">Lifetime Study Hours</p>
+                <p class="text-2xl font-bold font-mono text-textPrimary mt-1">${stats.lifetimeHours.toFixed(1)}h</p>
+                <p class="text-xs text-textMuted mt-1">${stats.totalSessions} completed sessions</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row: Weekly Bar Chart + Subject Breakdown -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card p-5 lg:col-span-2 flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-base font-bold text-textPrimary">Weekly Study Activity</h2>
+                  <p class="text-xs text-textMuted">Hours focused per day (Monday – Sunday)</p>
+                </div>
+                <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-bgElevated text-textSecondary">
+                  Weekly Goal: ${(appState.goals.weeklyMinutes / 60).toFixed(1)}h
+                </span>
+              </div>
+              <div class="relative h-64 w-full">
+                <canvas id="dash-weekly-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card p-5 flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-base font-bold text-textPrimary">Subject Breakdown</h2>
+                  <p class="text-xs text-textMuted">All-time distribution</p>
+                </div>
+                <button onclick="navigateTo('subjects')" class="text-xs font-semibold text-accent hover:underline">Manage</button>
+              </div>
+              ${stats.totalSessions === 0
+                ? `<div class="flex-1 flex flex-col items-center justify-center text-center py-8">
+                     <i data-lucide="pie-chart" class="w-10 h-10 text-textMuted mb-2"></i>
+                     <p class="text-sm font-medium text-textSecondary">No study sessions yet</p>
+                     <p class="text-xs text-textMuted mt-1">Complete a Pomodoro or Stopwatch session to see subject analytics.</p>
+                   </div>`
+                : `<div class="relative h-56 w-full flex items-center justify-center">
+                     <canvas id="dash-subject-chart"></canvas>
+                   </div>`
+              }
+            </div>
+          </div>
+
+          <!-- Bottom Row: Recent Sessions & Today's Tasks -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent Sessions -->
+            <div class="card p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-textPrimary">Recent Study Sessions</h2>
+                <button onclick="navigateTo('analytics')" class="text-xs font-semibold text-accent hover:underline">Full History</button>
+              </div>
+              ${recentSessions.length === 0
+                ? `<div class="py-10 text-center border border-dashed border-borderSubtle rounded-xl">
+                     <p class="text-sm font-medium text-textSecondary">Your study log is empty</p>
+                     <p class="text-xs text-textMuted mt-1 mb-3">Start a focus timer or load sample data in Settings to explore.</p>
+                     <button onclick="navigateTo('timer')" class="px-3.5 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold">Start First Session</button>
+                   </div>`
+                : `<div class="space-y-2.5">
+                    ${recentSessions.map((s) => {
+                      const subj = getSubjectById(s.subjectId);
+                      return `
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-bgElevated/60 border border-borderSubtle">
+                          <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${subj.color}"></span>
+                            <div class="min-w-0">
+                              <p class="text-sm font-semibold text-textPrimary truncate">${escapeHtml(subj.name)}</p>
+                              <p class="text-[11px] text-textMuted">${s.date} • ${formatTimeAMPM(s.startTime)} – ${formatTimeAMPM(s.endTime)} • <span class="capitalize">${s.mode}</span></p>
+                            </div>
+                          </div>
+                          <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-bgSurface text-accent shrink-0">${formatDurationHuman(s.durationSeconds)}</span>
+                        </div>
+                      `;
+                    }).join('')}
+                   </div>`
+              }
+            </div>
+
+            <!-- Today's Pending Tasks -->
+            <div class="card p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-textPrimary">Today's Study Plan</h2>
+                <button onclick="navigateTo('planner')" class="text-xs font-semibold text-accent hover:underline">Open Planner</button>
+              </div>
+              ${renderDashboardTasksWidget(stats.todayStr)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      initDashboardCharts(stats);
+    }
+
+    function renderDashboardTasksWidget(todayStr) {
+      const todaysTasks = appState.tasks.filter((t) => !t.completed && (!t.deadline || t.deadline <= todayStr)).slice(0, 5);
+      if (todaysTasks.length === 0) {
+        return `
+          <div class="py-10 text-center border border-dashed border-borderSubtle rounded-xl">
+            <p class="text-sm font-medium text-textSecondary">All caught up for today!</p>
+            <p class="text-xs text-textMuted mt-1 mb-3">Plan your next study tasks and deadlines in the Study Planner.</p>
+            <button onclick="navigateTo('planner')" class="px-3.5 py-1.5 rounded-lg bg-bgElevated hover:bg-accentSoft text-accent text-xs font-semibold transition">+ Add Study Task</button>
+          </div>
+        `;
+      }
+      return `
+        <div class="space-y-2.5">
+          ${todaysTasks.map((t) => {
+            const subj = getSubjectById(t.subjectId);
+            return `
+              <div class="flex items-center justify-between p-3 rounded-xl bg-bgElevated/60 border border-borderSubtle">
+                <div class="flex items-center gap-3 min-w-0">
+                  <button onclick="toggleTaskComplete('${t.id}')" class="w-5 h-5 rounded-md border border-textMuted hover:border-accent flex items-center justify-center shrink-0 transition"></button>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-textPrimary truncate">${escapeHtml(t.title)}</p>
+                    <p class="text-[11px] text-textMuted flex items-center gap-2">
+                      <span style="color:${subj.color}">● ${escapeHtml(subj.name)}</span>
+                      ${t.timeSlot ? `<span>• ${escapeHtml(t.timeSlot)}</span>` : ''}
+                    </p>
+                  </div>
+                </div>
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${priorityBadgeClass(t.priority)}">${t.priority}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function initDashboardCharts(stats) {
+      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+      const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.08)';
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
+
+      const weeklyCtx = document.getElementById('dash-weekly-chart');
+      if (weeklyCtx) {
+        const chart = new Chart(weeklyCtx, {
+          type: 'bar',
+          data: {
+            labels: stats.currentWeekDays.map((d) => d.label),
+            datasets: [{
+              label: 'Hours Studied',
+              data: stats.currentWeekDays.map((d) => +(d.seconds / 3600).toFixed(2)),
+              backgroundColor: accentColor,
+              borderRadius: 8,
+              maxBarThickness: 38
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.parsed.y} hrs`
+                }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: textColor } },
+              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: (v) => v + 'h' } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      }
+
+      const subjCtx = document.getElementById('dash-subject-chart');
+      if (subjCtx && stats.totalSessions > 0) {
+        const labels = [];
+        const data = [];
+        const colors = [];
+        Object.entries(stats.bySubject).forEach(([subId, sec]) => {
+          if (sec > 0) {
+            const s = getSubjectById(subId);
+            labels.push(s.name);
+            data.push(+(sec / 3600).toFixed(2));
+            colors.push(s.color);
+          }
+        });
+
+        const chart = new Chart(subjCtx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+              legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, padding: 12, font: { size: 11 } } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      }
+    }
+
+    // === VIEW 2: POMODORO FOCUS TIMER ===
+    function renderTimerView(container) {
+      const circumference = 728.85;
+      const pct = timerRuntime.pomoDurationSec > 0 ? timerRuntime.pomoRemainingSec / timerRuntime.pomoDurationSec : 1;
+      const offset = circumference * (1 - pct);
+
+      container.innerHTML = `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Pomodoro Focus Timer</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Timestamp-accurate deep work intervals. Breaks never inflate study hours.</p>
+            </div>
+            <button onclick="openFocusOverlay()" class="px-4 py-2 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-xs font-semibold text-textPrimary flex items-center gap-2 self-start">
+              <i data-lucide="maximize-2" class="w-4 h-4 text-accent"></i> Fullscreen Focus Mode
+            </button>
+          </div>
+
+          <div class="card p-6 sm:p-10 flex flex-col items-center text-center">
+            <!-- Mode Tabs -->
+            <div class="inline-flex p-1 rounded-2xl bg-bgElevated border border-borderSubtle mb-6">
+              <button onclick="setPomodoroMode('focus')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${timerRuntime.pomoMode === 'focus' ? 'bg-accent text-white shadow-xs' : 'text-textSecondary hover:text-textPrimary'}">
+                Focus (${appState.pomodoroSettings.focusMinutes}m)
+              </button>
+              <button onclick="setPomodoroMode('shortBreak')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${timerRuntime.pomoMode === 'shortBreak' ? 'bg-accent text-white shadow-xs' : 'text-textSecondary hover:text-textPrimary'}">
+                Short Break (${appState.pomodoroSettings.shortBreakMinutes}m)
+              </button>
+              <button onclick="setPomodoroMode('longBreak')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${timerRuntime.pomoMode === 'longBreak' ? 'bg-accent text-white shadow-xs' : 'text-textSecondary hover:text-textPrimary'}">
+                Long Break (${appState.pomodoroSettings.longBreakMinutes}m)
+              </button>
+            </div>
+
+            <!-- Subject Selector & Custom Minutes -->
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-8 w-full max-w-md">
+              <div class="flex-1 min-w-[180px]">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-textMuted text-left mb-1">Active Subject</label>
+                <select onchange="timerRuntime.pomoSubjectId = this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-medium text-textPrimary focus:outline-none focus:border-accent">
+                  ${appState.subjects.map((s) => `<option value="${s.id}" ${s.id === timerRuntime.pomoSubjectId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="w-32">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-textMuted text-left mb-1">Custom (Min)</label>
+                <div class="flex items-center gap-1">
+                  <input id="custom-pomo-min" type="number" min="1" max="240" placeholder="45" class="w-full px-3 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary focus:outline-none focus:border-accent" />
+                  <button onclick="applyCustomPomoDuration()" class="px-3 py-2.5 rounded-xl bg-bgElevated hover:bg-accent hover:text-white text-xs font-semibold transition">Set</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Circular Countdown Ring -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center mb-8">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 260 260">
+                <circle cx="130" cy="130" r="116" stroke="var(--bg-elevated)" stroke-width="10" fill="none" />
+                <circle id="pomo-progress-ring" cx="130" cy="130" r="116" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" class="transition-all duration-200" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-xs font-semibold uppercase tracking-widest text-accent mb-1">
+                  ${timerRuntime.pomoMode === 'focus' ? 'Focus Block' : (timerRuntime.pomoMode === 'shortBreak' ? 'Short Break' : 'Long Break')}
+                </span>
+                <span id="pomo-clock-text" class="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-textPrimary">
+                  ${formatClockMMSS(timerRuntime.pomoRemainingSec)}
+                </span>
+                <span class="text-xs text-textMuted mt-2">Completed cycles today: ${timerRuntime.pomoCyclesCompleted}</span>
+              </div>
+            </div>
+
+            <!-- Primary Controls -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              ${timerRuntime.pomoRunning
+                ? `<button onclick="pausePomodoro()" class="px-8 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                     <i data-lucide="pause" class="w-5 h-5"></i> Pause Timer
+                   </button>`
+                : `<button onclick="startPomodoro()" class="px-8 py-3.5 rounded-2xl bg-accent hover:bg-accentHover text-white font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                     <i data-lucide="play" class="w-5 h-5"></i> ${timerRuntime.pomoRemainingSec < timerRuntime.pomoDurationSec ? 'Resume' : 'Start Focus'}
+                   </button>`
+              }
+              <button onclick="resetPomodoro()" class="px-5 py-3.5 rounded-2xl bg-bgElevated hover:border-accent border border-borderSubtle text-textPrimary font-semibold text-sm transition flex items-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+              </button>
+            </div>
+
+            <!-- Auto-Transition Option -->
+            <div class="mt-8 pt-5 border-t border-borderSubtle w-full flex flex-wrap items-center justify-between gap-4 text-xs text-textSecondary">
+              <label class="inline-flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox" ${appState.pomodoroSettings.autoTransition ? 'checked' : ''} onchange="appState.pomodoroSettings.autoTransition = this.checked; saveState();" class="w-4 h-4 rounded accent-accent" />
+                <span>Auto-start next session (Focus ↔ Break)</span>
+              </label>
+              <span>Sound & Browser Alerts: <strong>${appState.pomodoroSettings.soundAlerts ? 'Enabled' : 'Muted'}</strong></span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyCustomPomoDuration() {
+      const val = parseInt(document.getElementById('custom-pomo-min').value, 10);
+      if (!val || val < 1 || val > 240) {
+        showToast('Enter a duration between 1 and 240 minutes.', 'warning');
+        return;
+      }
+      setPomodoroMode('focus', val);
+      showToast(`Custom focus timer set to ${val} minutes.`, 'info');
+    }
+
+    // === VIEW 3: STOPWATCH ===
+    function renderStopwatchView(container) {
+      const elapsed = getStopwatchElapsedMs();
+      const fmt = formatStopwatchHMS(elapsed);
+
+      container.innerHTML = `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Open-Ended Study Stopwatch</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Count up for flexible deep work. Paused time is excluded automatically.</p>
+            </div>
+            <button onclick="openFocusOverlay()" class="px-4 py-2 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-xs font-semibold text-textPrimary flex items-center gap-2 self-start">
+              <i data-lucide="maximize-2" class="w-4 h-4 text-accent"></i> Fullscreen Focus Mode
+            </button>
+          </div>
+
+          <div class="card p-6 sm:p-12 flex flex-col items-center text-center">
+            <!-- Subject Selector -->
+            <div class="w-full max-w-xs mb-8">
+              <label class="block text-[11px] font-semibold uppercase tracking-wider text-textMuted text-left mb-1">Studying Subject</label>
+              <select onchange="timerRuntime.swSubjectId = this.value" class="w-full px-4 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-medium text-textPrimary focus:outline-none focus:border-accent">
+                ${appState.subjects.map((s) => `<option value="${s.id}" ${s.id === timerRuntime.swSubjectId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+              </select>
+            </div>
+
+            <!-- High-Precision Clock Display -->
+            <div class="py-8 px-6 sm:px-12 rounded-3xl bg-bgElevated/70 border border-borderSubtle mb-8">
+              <div class="flex items-baseline justify-center font-mono">
+                <span id="sw-clock-main" class="text-5xl sm:text-7xl font-bold tracking-tight text-textPrimary">${fmt.main}</span>
+                <span id="sw-clock-ms" class="text-2xl sm:text-3xl font-semibold text-accent ml-1">${fmt.ms}</span>
+              </div>
+              <p class="text-xs text-textMuted mt-3">
+                ${timerRuntime.swRunning ? '● Recording active elapsed study duration' : (elapsed > 0 ? '⏸ Paused (paused time will not be logged)' : 'Press Start when you begin studying')}
+              </p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              ${timerRuntime.swRunning
+                ? `<button onclick="pauseStopwatch()" class="px-8 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                     <i data-lucide="pause" class="w-5 h-5"></i> Pause
+                   </button>`
+                : `<button onclick="startStopwatch()" class="px-8 py-3.5 rounded-2xl bg-accent hover:bg-accentHover text-white font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                     <i data-lucide="play" class="w-5 h-5"></i> ${elapsed > 0 ? 'Resume' : 'Start Stopwatch'}
+                   </button>`
+              }
+
+              ${elapsed > 0
+                ? `<button onclick="finishAndSaveStopwatch()" class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                     <i data-lucide="check-circle-2" class="w-5 h-5"></i> Finish & Save Session
+                   </button>
+                   <button onclick="resetStopwatch()" class="px-5 py-3.5 rounded-2xl bg-bgElevated border border-borderSubtle hover:border-rose-500 text-textSecondary hover:text-rose-400 font-semibold text-sm transition flex items-center gap-2">
+                     <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Discard
+                   </button>`
+                : ''
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // === VIEW 4: STUDY PLANNER & TASKS ===
+    function renderPlannerView(container) {
+      const todayStr = getLocalDateStr();
+      let filteredTasks = [];
+      if (plannerFilter === 'today') {
+        filteredTasks = appState.tasks.filter((t) => !t.completed && (!t.deadline || t.deadline <= todayStr));
+      } else if (plannerFilter === 'upcoming') {
+        filteredTasks = appState.tasks.filter((t) => !t.completed && t.deadline && t.deadline > todayStr);
+      } else {
+        filteredTasks = appState.tasks.filter((t) => t.completed);
+      }
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-textPrimary">Tasks & Daily Study Planner</h1>
+            <p class="text-xs sm:text-sm text-textSecondary">Organize assignments, exam topics, priorities, and daily time blocks.</p>
+          </div>
+
+          <!-- Add Task Form -->
+          <form onsubmit="handleAddTask(event)" class="card p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+            <div class="lg:col-span-4">
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Task Description</label>
+              <input id="task-title-input" type="text" required placeholder="e.g., Complete Graph Algorithms chapter" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary focus:outline-none focus:border-accent" />
+            </div>
+            <div class="lg:col-span-3">
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Subject</label>
+              <select id="task-subject-input" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary focus:outline-none focus:border-accent">
+                ${appState.subjects.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="lg:col-span-2">
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Deadline</label>
+              <input id="task-deadline-input" type="date" value="${todayStr}" class="w-full px-3 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary focus:outline-none focus:border-accent" />
+            </div>
+            <div class="lg:col-span-1">
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Priority</label>
+              <select id="task-priority-input" class="w-full px-2.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary focus:outline-none focus:border-accent">
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="lg:col-span-2 flex gap-2">
+              <input id="task-slot-input" type="text" placeholder="09:00 AM" class="w-full px-3 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary focus:outline-none focus:border-accent" title="Scheduled Time Slot" />
+              <button type="submit" class="px-4 py-2.5 rounded-xl bg-accent hover:bg-accentHover text-white font-semibold text-sm shrink-0 transition">Add</button>
+            </div>
+          </form>
+
+          <!-- Filter Tabs -->
+          <div class="flex items-center gap-2">
+            <button onclick="plannerFilter='today'; renderView('planner')" class="px-4 py-2 rounded-xl text-xs font-semibold transition ${plannerFilter === 'today' ? 'bg-accent text-white' : 'bg-bgSurface border border-borderSubtle text-textSecondary hover:text-textPrimary'}">
+              Today (${appState.tasks.filter((t) => !t.completed && (!t.deadline || t.deadline <= todayStr)).length})
+            </button>
+            <button onclick="plannerFilter='upcoming'; renderView('planner')" class="px-4 py-2 rounded-xl text-xs font-semibold transition ${plannerFilter === 'upcoming' ? 'bg-accent text-white' : 'bg-bgSurface border border-borderSubtle text-textSecondary hover:text-textPrimary'}">
+              Upcoming (${appState.tasks.filter((t) => !t.completed && t.deadline && t.deadline > todayStr).length})
+            </button>
+            <button onclick="plannerFilter='completed'; renderView('planner')" class="px-4 py-2 rounded-xl text-xs font-semibold transition ${plannerFilter === 'completed' ? 'bg-accent text-white' : 'bg-bgSurface border border-borderSubtle text-textSecondary hover:text-textPrimary'}">
+              Completed (${appState.tasks.filter((t) => t.completed).length})
+            </button>
+          </div>
+
+          <!-- Task List -->
+          <div class="space-y-3">
+            ${filteredTasks.length === 0
+              ? `<div class="card p-10 text-center">
+                   <p class="text-sm font-semibold text-textSecondary">No tasks in this section</p>
+                   <p class="text-xs text-textMuted mt-1">Use the form above to add a study task or schedule a session.</p>
+                 </div>`
+              : filteredTasks.map((t) => {
+                  const subj = getSubjectById(t.subjectId);
+                  return `
+                    <div class="card p-4 flex items-center justify-between gap-4">
+                      <div class="flex items-center gap-3.5 min-w-0">
+                        <button onclick="toggleTaskComplete('${t.id}')" class="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition ${t.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-textMuted hover:border-accent'}">
+                          ${t.completed ? `<i data-lucide="check" class="w-3.5 h-3.5"></i>` : ''}
+                        </button>
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold ${t.completed ? 'line-through text-textMuted' : 'text-textPrimary'} truncate">${escapeHtml(t.title)}</p>
+                          <div class="flex flex-wrap items-center gap-2.5 text-xs text-textMuted mt-1">
+                            <span class="font-medium" style="color:${subj.color}">● ${escapeHtml(subj.name)}</span>
+                            ${t.deadline ? `<span>📅 ${t.deadline}</span>` : ''}
+                            ${t.timeSlot ? `<span>⏰ ${escapeHtml(t.timeSlot)}</span>` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg ${priorityBadgeClass(t.priority)}">${t.priority}</span>
+                        <button onclick="deleteTask('${t.id}')" class="p-2 rounded-lg text-textMuted hover:text-rose-400 hover:bg-bgElevated transition" title="Delete Task">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    function priorityBadgeClass(priority) {
+      if (priority === 'High') return 'bg-rose-500/15 text-rose-400';
+      if (priority === 'Low') return 'bg-sky-500/15 text-sky-400';
+      return 'bg-amber-500/15 text-amber-400';
+    }
+
+    function handleAddTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('task-title-input').value.trim();
+      const subjectId = document.getElementById('task-subject-input').value;
+      const deadline = document.getElementById('task-deadline-input').value;
+      const priority = document.getElementById('task-priority-input').value;
+      const timeSlot = document.getElementById('task-slot-input').value.trim();
+      if (!title) return;
+
+      appState.tasks.unshift({
+        id: 'task_' + Date.now(),
+        title,
+        subjectId,
+        deadline,
+        priority,
+        timeSlot,
+        completed: false,
+        createdAt: new Date().toISOString()
+      });
+      saveState();
+      showToast('Study task added to planner.', 'success');
+      renderView('planner');
+    }
+
+    function toggleTaskComplete(id) {
+      const task = appState.tasks.find((t) => t.id === id);
+      if (!task) return;
+      task.completed = !task.completed;
+      if (task.completed) {
+        appState.bonusXp = (appState.bonusXp || 0) + 25;
+        showToast('Task completed! +25 XP', 'success');
+      }
+      saveState();
+      renderView(currentView);
+    }
+
+    function deleteTask(id) {
+      appState.tasks = appState.tasks.filter((t) => t.id !== id);
+      saveState();
+      renderView('planner');
+    }
+
+    // === VIEW 5: SUBJECTS & STUDY GOALS ===
+    function renderSubjectsView(container) {
+      const stats = computeStudyStats();
+      const todayStr = stats.todayStr;
+
+      // Today's seconds per subject
+      const todayBySubj = {};
+      appState.sessions.forEach((s) => {
+        if (s.date === todayStr) {
+          todayBySubj[s.subjectId] = (todayBySubj[s.subjectId] || 0) + s.durationSeconds;
+        }
+      });
+
+      const goalCards = [
+        { label: 'Daily Goal', currentSec: stats.todaySeconds, targetSec: appState.goals.dailyMinutes * 60 },
+        { label: 'Weekly Goal', currentSec: stats.weeklySeconds, targetSec: appState.goals.weeklyMinutes * 60 },
+        { label: 'Monthly Goal', currentSec: stats.monthlySeconds, targetSec: appState.goals.monthlyMinutes * 60 },
+        { label: 'Long-Term Goal', currentSec: stats.lifetimeSeconds, targetSec: appState.goals.longTermHours * 3600 }
+      ];
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Subjects & Study Goals</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Track subject-wise mastery and daily, weekly, monthly, and long-term targets.</p>
+            </div>
+            <button onclick="openAddSubjectModal()" class="px-4 py-2.5 rounded-xl bg-accent hover:bg-accentHover text-white text-sm font-semibold shadow-sm transition flex items-center gap-2 self-start">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add Subject
+            </button>
+          </div>
+
+          <!-- Global Goal Progress Bars -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            ${goalCards.map((g) => {
+              const pct = Math.min(100, Math.round((g.currentSec / Math.max(1, g.targetSec)) * 100));
+              return `
+                <div class="card p-5">
+                  <div class="flex items-center justify-between text-xs font-semibold mb-2">
+                    <span class="text-textSecondary">${g.label}</span>
+                    <span class="text-accent font-mono">${pct}%</span>
+                  </div>
+                  <p class="text-lg font-bold font-mono text-textPrimary mb-2">
+                    ${formatDurationHuman(g.currentSec)} <span class="text-xs font-normal text-textMuted">/ ${formatDurationHuman(g.targetSec)}</span>
+                  </p>
+                  <div class="w-full h-2 bg-bgElevated rounded-full overflow-hidden">
+                    <div class="h-full bg-accent rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Subject Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${appState.subjects.map((sub) => {
+              const totalSec = stats.bySubject[sub.id] || 0;
+              const todaySec = todayBySubj[sub.id] || 0;
+              const targetSec = (sub.dailyTargetMinutes || 60) * 60;
+              const pct = Math.min(100, Math.round((todaySec / Math.max(1, targetSec)) * 100));
+
+              return `
+                <div class="card p-5 flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                      <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-4 h-4 rounded-lg shrink-0" style="background-color: ${sub.color}"></span>
+                        <h3 class="font-bold text-base text-textPrimary truncate">${escapeHtml(sub.name)}</h3>
+                      </div>
+                      <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="openEditSubjectModal('${sub.id}')" class="p-1.5 rounded-lg text-textMuted hover:text-textPrimary hover:bg-bgElevated" title="Edit Subject">
+                          <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        ${appState.subjects.length > 1
+                          ? `<button onclick="deleteSubject('${sub.id}')" class="p-1.5 rounded-lg text-textMuted hover:text-rose-400 hover:bg-bgElevated" title="Delete Subject">
+                               <i data-lucide="trash-2" class="w-4 h-4"></i>
+                             </button>`
+                          : ''
+                        }
+                      </div>
+                    </div>
+
+                    <div class="flex items-baseline justify-between text-xs text-textSecondary mb-2">
+                      <span>Today: <strong class="text-textPrimary font-mono">${formatDurationHuman(todaySec)}</strong> / ${sub.dailyTargetMinutes}m</span>
+                      <span class="font-mono font-semibold" style="color:${sub.color}">${pct}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-bgElevated rounded-full overflow-hidden mb-4">
+                      <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${sub.color}"></div>
+                    </div>
+                  </div>
+
+                  <div class="pt-3 border-t border-borderSubtle flex items-center justify-between text-xs">
+                    <span class="text-textMuted">Accumulated Total: <strong class="text-textPrimary font-mono">${(totalSec / 3600).toFixed(1)}h</strong></span>
+                    <button onclick="timerRuntime.pomoSubjectId='${sub.id}'; navigateTo('timer');" class="font-semibold text-accent hover:underline">Study Now →</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Subject Comparison Chart -->
+          <div class="card p-5">
+            <h2 class="text-base font-bold text-textPrimary mb-1">Subject-Wise Accumulated Hours</h2>
+            <p class="text-xs text-textMuted mb-4">Comparative total study investment across all subjects</p>
+            <div class="relative h-64 w-full">
+              <canvas id="subjects-bar-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render Subject Bar Chart
+      const ctx = document.getElementById('subjects-bar-chart');
+      if (ctx) {
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.08)';
+        const chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: appState.subjects.map((s) => s.name),
+            datasets: [{
+              label: 'Total Hours',
+              data: appState.subjects.map((s) => +((stats.bySubject[s.id] || 0) / 3600).toFixed(2)),
+              backgroundColor: appState.subjects.map((s) => s.color),
+              borderRadius: 8,
+              maxBarThickness: 44
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: textColor } },
+              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: (v) => v + 'h' } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      }
+    }
+
+    function openAddSubjectModal() {
+      openModal(
+        'Add New Subject',
+        `<div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-textSecondary mb-1">Subject Name</label>
+            <input id="new-sub-name" type="text" placeholder="e.g., Operating Systems" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Daily Target (Minutes)</label>
+              <input id="new-sub-target" type="number" min="10" max="720" value="60" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Color Tag</label>
+              <input id="new-sub-color" type="color" value="#6366f1" class="w-full h-10 rounded-xl bg-bgElevated border border-borderSubtle cursor-pointer" />
+            </div>
+          </div>
+        </div>`,
+        `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Cancel</button>
+         <button onclick="saveNewSubject()" class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold">Create Subject</button>`
+      );
+    }
+
+    function saveNewSubject() {
+      const name = document.getElementById('new-sub-name').value.trim();
+      const target = parseInt(document.getElementById('new-sub-target').value, 10) || 60;
+      const color = document.getElementById('new-sub-color').value || '#6366f1';
+      if (!name) return;
+
+      appState.subjects.push({
+        id: 'sub_' + Date.now(),
+        name,
+        color,
+        dailyTargetMinutes: target
+      });
+      saveState();
+      closeModal();
+      showToast(`Subject "${name}" created.`, 'success');
+      renderView('subjects');
+    }
+
+    function openEditSubjectModal(subId) {
+      const sub = getSubjectById(subId);
+      openModal(
+        'Edit Subject',
+        `<div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-textSecondary mb-1">Subject Name</label>
+            <input id="edit-sub-name" type="text" value="${escapeHtml(sub.name)}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Daily Target (Minutes)</label>
+              <input id="edit-sub-target" type="number" min="10" max="720" value="${sub.dailyTargetMinutes}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-textSecondary mb-1">Color Tag</label>
+              <input id="edit-sub-color" type="color" value="${sub.color}" class="w-full h-10 rounded-xl bg-bgElevated border border-borderSubtle cursor-pointer" />
+            </div>
+          </div>
+        </div>`,
+        `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Cancel</button>
+         <button onclick="updateSubject('${sub.id}')" class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold">Save Changes</button>`
+      );
+    }
+
+    function updateSubject(subId) {
+      const sub = appState.subjects.find((s) => s.id === subId);
+      if (!sub) return;
+      const name = document.getElementById('edit-sub-name').value.trim();
+      if (name) sub.name = name;
+      sub.dailyTargetMinutes = parseInt(document.getElementById('edit-sub-target').value, 10) || 60;
+      sub.color = document.getElementById('edit-sub-color').value || sub.color;
+      saveState();
+      closeModal();
+      showToast('Subject updated.', 'success');
+      renderView('subjects');
+    }
+
+    function deleteSubject(subId) {
+      openModal(
+        'Delete Subject?',
+        `<p>Are you sure you want to remove this subject? Existing study sessions will remain in your history.</p>`,
+        `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Cancel</button>
+         <button onclick="appState.subjects = appState.subjects.filter(s => s.id !== '${subId}'); saveState(); closeModal(); renderView('subjects');" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold">Delete</button>`
+      );
+    }
+
+    // === VIEW 6: ANALYTICS & STUDY REPORTS ===
+    function renderAnalyticsView(container) {
+      const stats = computeStudyStats();
+      const ranges = [
+        { label: '7 Days', days: 7 },
+        { label: '30 Days', days: 30 },
+        { label: '90 Days', days: 90 },
+        { label: '1 Year', days: 365 },
+        { label: 'All Time', days: 9999 }
+      ];
+
+      // Build 112-day (16-week) consistency heatmap cells
+      const todayStr = stats.todayStr;
+      const heatmapDays = [];
+      for (let i = 111; i >= 0; i--) {
+        const dStr = addDays(todayStr, -i);
+        const sec = stats.byDate[dStr] || 0;
+        heatmapDays.push({ date: dStr, hours: sec / 3600 });
+      }
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Analytics & Study Reports</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Deep insights into your study consistency, averages, and subject mastery.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 no-print">
+              <div class="inline-flex p-1 rounded-xl bg-bgSurface border border-borderSubtle">
+                ${ranges.map((r) => `
+                  <button onclick="analyticsRangeDays=${r.days}; renderView('analytics')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition ${analyticsRangeDays === r.days ? 'bg-accent text-white' : 'text-textSecondary hover:text-textPrimary'}">${r.label}</button>
+                `).join('')}
+              </div>
+              <button onclick="exportSessionsCSV()" class="px-3.5 py-2 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-xs font-semibold text-textPrimary flex items-center gap-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV
+              </button>
+              <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-accent hover:bg-accentHover text-white text-xs font-semibold flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print / PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Deep Summary Metrics -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Daily Average</p>
+              <p class="text-lg font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.avgDailySeconds)}</p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Weekly Average</p>
+              <p class="text-lg font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.avgWeeklySeconds)}</p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Monthly Total</p>
+              <p class="text-lg font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.monthlySeconds)}</p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Yearly Total</p>
+              <p class="text-lg font-bold font-mono text-textPrimary mt-1">${(stats.yearlySeconds / 3600).toFixed(1)}h</p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Longest Session</p>
+              <p class="text-lg font-bold font-mono text-textPrimary mt-1">${formatDurationHuman(stats.longestSessionSeconds)}</p>
+            </div>
+            <div class="card p-4">
+              <p class="text-[11px] text-textMuted font-medium">Best Day</p>
+              <p class="text-lg font-bold font-mono text-accent mt-1">${stats.bestDaySeconds > 0 ? formatDurationHuman(stats.bestDaySeconds) : '--'}</p>
+              <p class="text-[10px] text-textMuted truncate">${stats.bestDayDate || 'No data'}</p>
+            </div>
+          </div>
+
+          <!-- Primary Trend Chart & Subject Pie -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card p-5 lg:col-span-2">
+              <h2 class="text-base font-bold text-textPrimary mb-1">Daily Study Trend (${analyticsRangeDays === 9999 ? 'All Time' : `Last ${analyticsRangeDays} Days`})</h2>
+              <p class="text-xs text-textMuted mb-4">Hours logged per day across the selected timeframe</p>
+              <div class="relative h-72 w-full">
+                <canvas id="analytics-trend-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card p-5">
+              <h2 class="text-base font-bold text-textPrimary mb-1">Subject Distribution</h2>
+              <p class="text-xs text-textMuted mb-4">Share of total study time</p>
+              <div class="relative h-72 w-full">
+                <canvas id="analytics-pie-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 16-Week Consistency Heatmap -->
+          <div class="card p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-textPrimary">16-Week Study Consistency Heatmap</h2>
+                <p class="text-xs text-textMuted">Visualizing daily focus intensity over the past 112 days</p>
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] text-textMuted">
+                <span>Less</span>
+                <span class="w-3 h-3 rounded-sm bg-bgElevated inline-block"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-900 inline-block"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-700 inline-block"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-300 inline-block"></span>
+                <span>More</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-[repeat(14,minmax(0,1fr))] sm:grid-cols-[repeat(28,minmax(0,1fr))] gap-1.5">
+              ${heatmapDays.map((d) => {
+                let bg = 'bg-bgElevated';
+                if (d.hours > 0 && d.hours < 1) bg = 'bg-emerald-900/90';
+                else if (d.hours >= 1 && d.hours < 3) bg = 'bg-emerald-700';
+                else if (d.hours >= 3 && d.hours < 5) bg = 'bg-emerald-500';
+                else if (d.hours >= 5) bg = 'bg-emerald-300';
+                return `<div title="${d.date}: ${d.hours.toFixed(1)}h" class="aspect-square rounded-sm ${bg} transition hover:scale-125"></div>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      initAnalyticsCharts(stats);
+    }
+
+    function initAnalyticsCharts(stats) {
+      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+      const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.08)';
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
+
+      // Build date series for the selected range (7 / 30 / 90 / 365 / all-time)
+      let startDateStr = stats.todayStr;
+      if (analyticsRangeDays === 9999) {
+        const earliest = appState.sessions.length
+          ? appState.sessions.reduce((min, s) => (s.date < min ? s.date : min), stats.todayStr)
+          : addDays(stats.todayStr, -29);
+        startDateStr = earliest || addDays(stats.todayStr, -29);
+      } else {
+        startDateStr = addDays(stats.todayStr, -(analyticsRangeDays - 1));
+      }
+      const daysToShow = Math.max(1, Math.round((parseLocalDate(stats.todayStr) - parseLocalDate(startDateStr)) / 86400000) + 1);
+      const useFullDateLabels = daysToShow > 120;
+      const labels = [];
+      const values = [];
+      for (let i = daysToShow - 1; i >= 0; i--) {
+        const dStr = addDays(stats.todayStr, -i);
+        labels.push(useFullDateLabels ? dStr : dStr.slice(5)); // MM-DD or YYYY-MM-DD
+        values.push(+((stats.byDate[dStr] || 0) / 3600).toFixed(2));
+      }
+
+      const trendCtx = document.getElementById('analytics-trend-chart');
+      if (trendCtx) {
+        const chart = new Chart(trendCtx, {
+          type: daysToShow <= 14 ? 'bar' : 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Hours Studied',
+              data: values,
+              borderColor: accentColor,
+              backgroundColor: daysToShow <= 14 ? accentColor : hexToRgba(accentColor.startsWith('#') ? accentColor : '#6366f1', 0.18),
+              fill: true,
+              tension: 0.35,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 12 } },
+              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: (v) => v + 'h' } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      }
+
+      const pieCtx = document.getElementById('analytics-pie-chart');
+      if (pieCtx) {
+        const subLabels = [];
+        const subData = [];
+        const subColors = [];
+        Object.entries(stats.bySubject).forEach(([id, sec]) => {
+          if (sec > 0) {
+            const s = getSubjectById(id);
+            subLabels.push(s.name);
+            subData.push(+(sec / 3600).toFixed(2));
+            subColors.push(s.color);
+          }
+        });
+
+        const chart = new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+            labels: subLabels.length ? subLabels : ['No Data'],
+            datasets: [{
+              data: subData.length ? subData : [1],
+              backgroundColor: subColors.length ? subColors : ['#334155'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, font: { size: 11 } } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      }
+    }
+
+    function exportSessionsCSV() {
+      if (appState.sessions.length === 0) {
+        showToast('No study sessions available to export.', 'warning');
+        return;
+      }
+      const headers = ['Session ID', 'Date', 'Start Time', 'End Time', 'Duration (Minutes)', 'Subject', 'Mode', 'Status'];
+      const rows = appState.sessions.map((s) => [
+        s.id,
+        s.date,
+        formatTimeAMPM(s.startTime),
+        formatTimeAMPM(s.endTime),
+        (s.durationSeconds / 60).toFixed(1),
+        `"${getSubjectById(s.subjectId).name.replace(/"/g, '""')}"`,
+        s.mode,
+        s.status
+      ]);
+      const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+      triggerDownload(csvContent, `FocusFlow_Study_Report_${getLocalDateStr()}.csv`, 'text/csv;charset=utf-8;');
+      showToast('CSV study report downloaded!', 'success');
+    }
+
+    // === VIEW 7: INTERACTIVE STUDY CALENDAR ===
+    function renderCalendarView(container) {
+      const stats = computeStudyStats();
+      const year = calendarMonthDate.getFullYear();
+      const month = calendarMonthDate.getMonth();
+      const monthName = calendarMonthDate.toLocaleDateString([], { month: 'long', year: 'numeric' });
+
+      const firstDayWeekday = new Date(year, month, 1).getDay(); // 0=Sun
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const cells = [];
+      for (let i = 0; i < firstDayWeekday; i++) cells.push(null);
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const sec = stats.byDate[dStr] || 0;
+        cells.push({ day: d, dateStr: dStr, hours: sec / 3600, seconds: sec });
+      }
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Interactive Study Calendar</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Click any date to inspect detailed session logs and start/end timestamps.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="changeCalendarMonth(-1)" class="p-2.5 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-textPrimary transition">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <span class="px-4 py-2 rounded-xl bg-bgSurface border border-borderSubtle text-sm font-bold text-textPrimary min-w-[160px] text-center">${monthName}</span>
+              <button onclick="changeCalendarMonth(1)" class="p-2.5 rounded-xl bg-bgSurface border border-borderSubtle hover:border-accent text-textPrimary transition">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="card p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span class="font-semibold text-textSecondary">Study Intensity Key:</span>
+            <div class="flex flex-wrap items-center gap-4">
+              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-bgElevated border border-borderSubtle"></span> No study</span>
+              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-emerald-500/25 border border-emerald-500/40"></span> &lt; 1 hour</span>
+              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-emerald-500/50 border border-emerald-500/60"></span> 1 – 3 hours</span>
+              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-emerald-600 text-white"></span> 3 – 5 hours</span>
+              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-emerald-400"></span> &gt; 5 hours</span>
+            </div>
+          </div>
+
+          <!-- Calendar Grid -->
+          <div class="card p-4 sm:p-6">
+            <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-textMuted mb-3">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div class="grid grid-cols-7 gap-2">
+              ${cells.map((c) => {
+                if (!c) return `<div class="aspect-square rounded-xl bg-transparent"></div>`;
+                let styleClass = 'bg-bgElevated/70 border-borderSubtle text-textPrimary';
+                if (c.hours > 0 && c.hours < 1) styleClass = 'bg-emerald-500/25 border-emerald-500/40 text-textPrimary';
+                else if (c.hours >= 1 && c.hours < 3) styleClass = 'bg-emerald-500/50 border-emerald-500/60 text-textPrimary';
+                else if (c.hours >= 3 && c.hours < 5) styleClass = 'bg-emerald-600 border-emerald-500 text-white';
+                else if (c.hours >= 5) styleClass = 'bg-emerald-400 border-emerald-300 text-slate-950 font-bold';
+
+                const isToday = c.dateStr === stats.todayStr;
+                return `
+                  <button onclick="openDayDetailModal('${c.dateStr}')" class="aspect-square rounded-xl border p-1.5 sm:p-2.5 flex flex-col justify-between text-left transition hover:scale-[1.03] ${styleClass} ${isToday ? 'ring-2 ring-accent' : ''}">
+                    <span class="text-xs sm:text-sm font-bold">${c.day}</span>
+                    <span class="text-[10px] sm:text-xs font-mono truncate opacity-90">${c.seconds > 0 ? formatDurationHuman(c.seconds) : ''}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function changeCalendarMonth(delta) {
+      calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() + delta, 1);
+      renderView('calendar');
+    }
+
+    function openDayDetailModal(dateStr) {
+      const daySessions = appState.sessions.filter((s) => s.date === dateStr);
+      const totalSec = daySessions.reduce((acc, s) => acc + s.durationSeconds, 0);
+      const uniqueSubjects = [...new Set(daySessions.map((s) => getSubjectById(s.subjectId).name))];
+
+      const bodyHTML = daySessions.length === 0
+        ? `<div class="py-6 text-center">
+             <p class="text-sm font-medium text-textPrimary">No study sessions recorded on ${dateStr}.</p>
+             <p class="text-xs text-textMuted mt-1">Every day is a fresh opportunity to build your streak!</p>
+           </div>`
+        : `<div class="space-y-4">
+             <div class="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-bgElevated">
+               <div>
+                 <p class="text-[11px] text-textMuted">Total Study</p>
+                 <p class="text-base font-bold font-mono text-accent">${formatDurationHuman(totalSec)}</p>
+               </div>
+               <div>
+                 <p class="text-[11px] text-textMuted">Sessions</p>
+                 <p class="text-base font-bold font-mono text-textPrimary">${daySessions.length}</p>
+               </div>
+               <div>
+                 <p class="text-[11px] text-textMuted">Subjects</p>
+                 <p class="text-base font-bold font-mono text-textPrimary">${uniqueSubjects.length}</p>
+               </div>
+             </div>
+             <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+               ${daySessions.map((s) => {
+                 const subj = getSubjectById(s.subjectId);
+                 return `
+                   <div class="p-3 rounded-xl bg-bgElevated/60 border border-borderSubtle flex items-center justify-between">
+                     <div>
+                       <p class="text-xs font-bold text-textPrimary flex items-center gap-1.5">
+                         <span class="w-2.5 h-2.5 rounded-full" style="background:${subj.color}"></span>
+                         ${escapeHtml(subj.name)}
+                       </p>
+                       <p class="text-[11px] text-textMuted mt-0.5">${formatTimeAMPM(s.startTime)} → ${formatTimeAMPM(s.endTime)} (${s.mode})</p>
+                     </div>
+                     <span class="font-mono text-xs font-bold text-accent">${formatDurationHuman(s.durationSeconds)}</span>
+                   </div>
+                 `;
+               }).join('')}
+             </div>
+           </div>`;
+
+      openModal(`Study Log: ${dateStr}`, bodyHTML, `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold">Close</button>`);
+    }
+
+    // === VIEW 8: ACHIEVEMENTS, CHALLENGES & GAMIFICATION ===
+    function renderAchievementsView(container) {
+      const stats = computeStudyStats();
+      checkAchievements(stats);
+
+      const dailyChallenges = [
+        { id: `dc_60_${stats.todayStr}`, title: 'Focused Hour', desc: 'Study at least 60 minutes today.', progress: Math.min(100, Math.round((stats.todaySeconds / 3600) * 100)), done: stats.todaySeconds >= 3600, xp: 120 },
+        { id: `dc_goal_${stats.todayStr}`, title: 'Daily Target Crusher', desc: `Complete 100% of your ${appState.goals.dailyMinutes}m daily goal.`, progress: Math.min(100, Math.round((stats.todaySeconds / (appState.goals.dailyMinutes * 60)) * 100)), done: stats.todaySeconds >= appState.goals.dailyMinutes * 60, xp: 250 }
+      ];
+
+      const weekKey = stats.currentWeekDays[0]?.date || stats.todayStr;
+      const weeklyChallenges = [
+        { id: `wc_5h_${weekKey}`, title: 'Weekly Momentum', desc: 'Log at least 5 hours this week.', progress: Math.min(100, Math.round((stats.weeklySeconds / (5 * 3600)) * 100)), done: stats.weeklySeconds >= 5 * 3600, xp: 300 },
+        { id: `wc_goal_${weekKey}`, title: 'Weekly Goal Crusher', desc: `Reach 100% of your ${(appState.goals.weeklyMinutes / 60).toFixed(0)}h weekly goal.`, progress: Math.min(100, Math.round((stats.weeklySeconds / Math.max(1, appState.goals.weeklyMinutes * 60)) * 100)), done: stats.weeklySeconds >= appState.goals.weeklyMinutes * 60, xp: 500 }
+      ];
+
+      const challengeCardHTML = (ch) => {
+        const claimed = appState.claimedChallenges.includes(ch.id);
+        return `
+          <div class="p-4 rounded-xl bg-bgElevated/70 border border-borderSubtle flex items-center justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-textPrimary">${ch.title}</h3>
+                <span class="text-[11px] font-mono font-bold text-accent">+${ch.xp} XP</span>
+              </div>
+              <p class="text-xs text-textMuted mt-0.5">${ch.desc}</p>
+              <div class="w-full h-1.5 bg-bgBase rounded-full overflow-hidden mt-2.5">
+                <div class="h-full bg-emerald-500 rounded-full" style="width: ${ch.progress}%"></div>
+              </div>
+            </div>
+            ${claimed
+              ? `<span class="px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-bold shrink-0">Claimed ✓</span>`
+              : (ch.done
+                  ? `<button onclick="claimChallengeXP('${ch.id}', ${ch.xp})" class="px-3.5 py-2 rounded-xl bg-accent hover:bg-accentHover text-white text-xs font-bold shrink-0 transition">Claim XP</button>`
+                  : `<span class="font-mono text-xs font-semibold text-textMuted shrink-0">${ch.progress}%</span>`)
+            }
+          </div>
+        `;
+      };
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-textPrimary">Achievements, Levels & Challenges</h1>
+            <p class="text-xs sm:text-sm text-textSecondary">Earn XP through verified focus sessions and unlock milestone badges.</p>
+          </div>
+
+          <!-- Level & XP Hero Card -->
+          <div class="card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-accent text-white flex flex-col items-center justify-center shadow-lg shrink-0">
+                <span class="text-[10px] uppercase font-bold opacity-80">LVL</span>
+                <span class="text-2xl font-extrabold leading-none">${stats.level}</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold text-textPrimary">Level ${stats.level} Deep Work Scholar</h2>
+                <p class="text-xs sm:text-sm text-textSecondary mt-0.5">Total XP: <strong class="font-mono text-accent">${stats.totalXp.toLocaleString()} XP</strong> • Next Level at ${stats.nextLevelXp.toLocaleString()} XP</p>
+                <div class="w-full max-w-md h-2.5 bg-bgElevated rounded-full overflow-hidden mt-3">
+                  <div class="h-full bg-accent rounded-full transition-all duration-500" style="width: ${stats.levelProgressPct}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 text-center shrink-0">
+              <div class="px-4 py-3 rounded-2xl bg-bgElevated">
+                <p class="text-xl font-bold font-mono text-textPrimary">${appState.unlockedAchievements.length}/${ACHIEVEMENTS_LIST.length}</p>
+                <p class="text-[11px] text-textMuted">Badges Unlocked</p>
+              </div>
+              <div class="px-4 py-3 rounded-2xl bg-bgElevated">
+                <p class="text-xl font-bold font-mono text-amber-400">${stats.currentStreak}d</p>
+                <p class="text-[11px] text-textMuted">Active Streak</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Challenges -->
+          <div class="card p-5">
+            <h2 class="text-base font-bold text-textPrimary mb-3">Today's Focus Challenges</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${dailyChallenges.map(challengeCardHTML).join('')}
+            </div>
+          </div>
+
+          <!-- Weekly Challenges -->
+          <div class="card p-5">
+            <h2 class="text-base font-bold text-textPrimary mb-3">This Week's Challenges</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${weeklyChallenges.map(challengeCardHTML).join('')}
+            </div>
+          </div>
+
+          <!-- Achievement Badges Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            ${ACHIEVEMENTS_LIST.map((ach) => {
+              const unlocked = appState.unlockedAchievements.includes(ach.id);
+              return `
+                <div class="card p-5 flex flex-col justify-between transition ${unlocked ? 'border-accent/50' : 'opacity-60'}">
+                  <div>
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="w-11 h-11 rounded-2xl flex items-center justify-center ${unlocked ? 'bg-accent text-white shadow-md' : 'bg-bgElevated text-textMuted'}">
+                        <i data-lucide="${ach.icon}" class="w-5 h-5"></i>
+                      </div>
+                      <span class="text-xs font-mono font-bold ${unlocked ? 'text-accent' : 'text-textMuted'}">+${ach.xp} XP</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-textPrimary">${ach.title}</h3>
+                    <p class="text-xs text-textSecondary mt-1 leading-relaxed">${ach.desc}</p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-borderSubtle flex items-center justify-between text-[11px] font-semibold">
+                    ${unlocked
+                      ? `<span class="text-emerald-400 flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Unlocked</span>`
+                      : `<span class="text-textMuted flex items-center gap-1"><i data-lucide="lock" class="w-3.5 h-3.5"></i> Locked</span>`
+                    }
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function claimChallengeXP(challengeId, xp) {
+      if (appState.claimedChallenges.includes(challengeId)) return;
+      appState.claimedChallenges.push(challengeId);
+      appState.bonusXp = (appState.bonusXp || 0) + xp;
+      saveState();
+      showToast(`🎉 Claimed +${xp} XP from Daily Challenge!`, 'success');
+      renderView('achievements');
+    }
+
+    // === VIEW 9: AMBIENT MUSIC & BACKGROUND SOUNDS ===
+    function renderSoundsView(container) {
+      const activeCount = Object.keys(soundEngine.activeNodes).length;
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-textPrimary">Ambient Soundscape Mixer</h1>
+              <p class="text-xs sm:text-sm text-textSecondary">Procedural Web Audio API soundscapes. Mix multiple layers; audio continues across pages.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-bgSurface border border-borderSubtle">
+                <i data-lucide="volume-2" class="w-4 h-4 text-accent"></i>
+                <span class="text-xs font-semibold text-textSecondary">Master</span>
+                <input type="range" min="0" max="1" step="0.01" value="${soundEngine.masterVolume}" oninput="soundEngine.setMasterVolume(parseFloat(this.value))" class="w-24" />
+              </div>
+              ${activeCount > 0
+                ? `<button onclick="soundEngine.stopAll(); renderView('sounds')" class="px-3.5 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-xs font-semibold transition">Stop All</button>
+                   <button onclick="openSaveSoundPresetModal()" class="px-3.5 py-2 rounded-xl bg-accent text-white text-xs font-semibold transition">Save Mix Preset</button>`
+                : ''
+              }
+            </div>
+          </div>
+
+          <!-- Saved Sound Mix Presets -->
+          <div class="card p-4 flex flex-wrap items-center gap-2.5">
+            <span class="text-xs font-bold text-textSecondary mr-1">Mix Presets:</span>
+            ${appState.soundPresets.map((p) => `
+              <div class="inline-flex items-center rounded-xl bg-bgElevated border border-borderSubtle overflow-hidden">
+                <button onclick='soundEngine.applyPreset(${JSON.stringify(p.volumes)})' class="px-3 py-1.5 text-xs font-semibold text-textPrimary hover:text-accent transition">
+                  ▶ ${escapeHtml(p.name)}
+                </button>
+                ${!p.id.startsWith('preset_')
+                  ? `<button onclick="deleteSoundPreset('${p.id}')" class="px-2 py-1.5 text-textMuted hover:text-rose-400 border-l border-borderSubtle text-xs">×</button>`
+                  : ''
+                }
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- 15 Sound Cards Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            ${AMBIENT_SOUNDS_CATALOG.map((snd) => {
+              const activeEntry = soundEngine.activeNodes[snd.id];
+              const isPlaying = Boolean(activeEntry);
+              const vol = isPlaying ? activeEntry.volume : 0.55;
+
+              return `
+                <div class="card p-4 flex flex-col justify-between transition ${isPlaying ? 'border-accent bg-accentSoft/30' : ''}">
+                  <div class="flex items-start justify-between gap-2 mb-4">
+                    <div>
+                      <span class="text-2xl block mb-1">${snd.emoji}</span>
+                      <h3 class="text-sm font-bold text-textPrimary">${snd.name}</h3>
+                      <span class="text-[10px] uppercase tracking-wider text-textMuted">${snd.category}</span>
+                    </div>
+                    <button onclick="quickToggleSound('${snd.id}')" class="w-9 h-9 rounded-xl flex items-center justify-center transition ${isPlaying ? 'bg-accent text-white shadow-sm' : 'bg-bgElevated text-textSecondary hover:text-textPrimary'}">
+                      <i data-lucide="${isPlaying ? 'pause' : 'play'}" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+
+                  <div>
+                    <div class="flex items-center justify-between text-[11px] text-textMuted mb-1">
+                      <span>Volume</span>
+                      <span class="font-mono">${Math.round(vol * 100)}%</span>
+                    </div>
+                    <input type="range" min="0.05" max="1" step="0.01" value="${vol}"
+                      oninput="handleIndividualSoundSlider('${snd.id}', parseFloat(this.value), this)"
+                      class="w-full" />
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleIndividualSoundSlider(soundId, vol, inputEl) {
+      if (!soundEngine.activeNodes[soundId]) {
+        soundEngine.startSound(soundId, vol);
+        renderView('sounds');
+      } else {
+        soundEngine.setVolume(soundId, vol);
+        const label = inputEl.previousElementSibling?.querySelector('span:last-child');
+        if (label) label.textContent = `${Math.round(vol * 100)}%`;
+      }
+    }
+
+    function openSaveSoundPresetModal() {
+      const activeEntries = Object.entries(soundEngine.activeNodes);
+      if (activeEntries.length === 0) return;
+      openModal(
+        'Save Ambient Mix Preset',
+        `<div class="space-y-3">
+          <p class="text-xs text-textSecondary">Save your currently active ${activeEntries.length} sound layers as a one-click preset.</p>
+          <input id="preset-name-input" type="text" placeholder="e.g., Midnight Thunder & Typing" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary" />
+        </div>`,
+        `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Cancel</button>
+         <button onclick="saveCurrentSoundPreset()" class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold">Save Preset</button>`
+      );
+    }
+
+    function saveCurrentSoundPreset() {
+      const name = document.getElementById('preset-name-input').value.trim();
+      if (!name) return;
+      const volumes = {};
+      Object.entries(soundEngine.activeNodes).forEach(([id, entry]) => {
+        volumes[id] = entry.volume;
+      });
+      appState.soundPresets.push({ id: 'custom_' + Date.now(), name, volumes });
+      saveState();
+      closeModal();
+      showToast(`Saved mix preset "${name}".`, 'success');
+      renderView('sounds');
+    }
+
+    function deleteSoundPreset(id) {
+      appState.soundPresets = appState.soundPresets.filter((p) => p.id !== id);
+      saveState();
+      renderView('sounds');
+    }
+
+    // === VIEW 10: SETTINGS, THEMES & DATA MANAGEMENT ===
+    function renderSettingsView(container) {
+      container.innerHTML = `
+        <div class="max-w-4xl space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-textPrimary">Settings, Themes & Data</h1>
+            <p class="text-xs sm:text-sm text-textSecondary">Customize your FocusFlow workspace, goals, timer defaults, and local backups.</p>
+          </div>
+
+          <!-- Theme & Accent Customization -->
+          <div class="card p-6 space-y-5">
+            <div>
+              <h2 class="text-base font-bold text-textPrimary">Themes & Appearance</h2>
+              <p class="text-xs text-textMuted">Switch between 8 curated workspace themes or override the accent color.</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              ${THEMES.map((t) => {
+                const isSelected = appState.profile.theme === t.id;
+                return `
+                  <button onclick="applyTheme('${t.id}', null); renderView('settings')" class="p-3 rounded-2xl border text-left transition flex items-center gap-3 ${isSelected ? 'border-accent bg-accentSoft/40' : 'border-borderSubtle bg-bgElevated/50 hover:border-textMuted'}">
+                    <span class="w-8 h-8 rounded-xl border border-white/15 flex items-center justify-center shrink-0" style="background-color: ${t.swatch}">
+                      <span class="w-3 h-3 rounded-full" style="background-color: ${t.accent}"></span>
+                    </span>
+                    <span class="text-xs font-bold text-textPrimary truncate">${t.name}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="pt-3 border-t border-borderSubtle flex flex-wrap items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-textSecondary">Custom Accent Color Override:</span>
+              <div class="flex flex-wrap items-center gap-2">
+                ${ACCENT_PRESETS.map((hex) => `
+                  <button onclick="applyTheme(appState.profile.theme, '${hex}'); renderView('settings')" class="w-7 h-7 rounded-full border-2 transition ${appState.profile.customAccent === hex ? 'border-white scale-110' : 'border-transparent'}" style="background-color: ${hex}"></button>
+                `).join('')}
+                <button onclick="applyTheme(appState.profile.theme, null); renderView('settings')" class="px-2.5 py-1 rounded-lg bg-bgElevated text-[11px] font-semibold text-textSecondary hover:text-textPrimary">Reset Default</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile & Goals -->
+          <form onsubmit="handleSaveSettings(event)" class="card p-6 space-y-5">
+            <h2 class="text-base font-bold text-textPrimary">Profile, Goals & Timer Defaults</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Display Username</label>
+                <input id="set-username" type="text" required value="${escapeHtml(appState.profile.username)}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Daily Study Goal (Minutes)</label>
+                <input id="set-daily-goal" type="number" min="15" max="960" value="${appState.goals.dailyMinutes}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Weekly Study Goal (Hours)</label>
+                <input id="set-weekly-goal" type="number" min="1" max="120" value="${Math.round(appState.goals.weeklyMinutes / 60)}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Monthly Study Goal (Hours)</label>
+                <input id="set-monthly-goal" type="number" min="5" max="500" value="${Math.round(appState.goals.monthlyMinutes / 60)}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Long-Term Target (Hours)</label>
+                <input id="set-longterm-goal" type="number" min="10" max="10000" value="${appState.goals.longTermHours}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Default Pomodoro Focus (Minutes)</label>
+                <input id="set-pomo-focus" type="number" min="5" max="180" value="${appState.pomodoroSettings.focusMinutes}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Short Break (Minutes)</label>
+                <input id="set-pomo-short" type="number" min="1" max="60" value="${appState.pomodoroSettings.shortBreakMinutes}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-textSecondary mb-1">Long Break (Minutes)</label>
+                <input id="set-pomo-long" type="number" min="5" max="90" value="${appState.pomodoroSettings.longBreakMinutes}" class="w-full px-3.5 py-2.5 rounded-xl bg-bgElevated border border-borderSubtle text-sm font-mono text-textPrimary" />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-6 pt-2">
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-textPrimary cursor-pointer">
+                <input id="set-sound-alerts" type="checkbox" ${appState.pomodoroSettings.soundAlerts ? 'checked' : ''} class="w-4 h-4 accent-accent" />
+                <span>Completion Sound Chime</span>
+              </label>
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-textPrimary cursor-pointer">
+                <input id="set-browser-notif" type="checkbox" ${appState.pomodoroSettings.browserNotifications ? 'checked' : ''} class="w-4 h-4 accent-accent" />
+                <span>Desktop Browser Notifications</span>
+              </label>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accentHover text-white text-sm font-semibold transition">Save Preferences</button>
+            </div>
+          </form>
+
+          <!-- Data Management & Backup -->
+          <div class="card p-6 space-y-4">
+            <div>
+              <h2 class="text-base font-bold text-textPrimary">Data Backup, Restore & Sample History</h2>
+              <p class="text-xs text-textMuted">All data is stored locally in your browser. Export JSON backups or CSV reports anytime.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="downloadJSONBackup()" class="px-4 py-2.5 rounded-xl bg-bgElevated hover:border-accent border border-borderSubtle text-xs font-semibold text-textPrimary flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4 text-accent"></i> Backup Data (JSON)
+              </button>
+              <label class="px-4 py-2.5 rounded-xl bg-bgElevated hover:border-accent border border-borderSubtle text-xs font-semibold text-textPrimary flex items-center gap-2 cursor-pointer">
+                <i data-lucide="upload" class="w-4 h-4 text-accent"></i> Restore Backup
+                <input type="file" accept=".json" onchange="restoreJSONBackup(event)" class="hidden" />
+              </label>
+              <button onclick="exportSessionsCSV()" class="px-4 py-2.5 rounded-xl bg-bgElevated hover:border-accent border border-borderSubtle text-xs font-semibold text-textPrimary flex items-center gap-2">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i> Export Records (CSV)
+              </button>
+              <button onclick="loadSampleStudyHistory()" class="px-4 py-2.5 rounded-xl bg-accentSoft text-accent hover:bg-accent hover:text-white text-xs font-semibold flex items-center gap-2 transition">
+                <i data-lucide="database" class="w-4 h-4"></i> Load Sample Study History
+              </button>
+              <button onclick="confirmClearAllData()" class="px-4 py-2.5 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-xs font-semibold flex items-center gap-2 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      appState.profile.username = document.getElementById('set-username').value.trim() || 'Scholar';
+      appState.goals.dailyMinutes = parseInt(document.getElementById('set-daily-goal').value, 10) || 180;
+      appState.goals.weeklyMinutes = (parseInt(document.getElementById('set-weekly-goal').value, 10) || 20) * 60;
+      appState.goals.monthlyMinutes = (parseInt(document.getElementById('set-monthly-goal').value, 10) || 80) * 60;
+      appState.goals.longTermHours = parseInt(document.getElementById('set-longterm-goal').value, 10) || 500;
+
+      appState.pomodoroSettings.focusMinutes = parseInt(document.getElementById('set-pomo-focus').value, 10) || 25;
+      appState.pomodoroSettings.shortBreakMinutes = parseInt(document.getElementById('set-pomo-short').value, 10) || 5;
+      appState.pomodoroSettings.longBreakMinutes = parseInt(document.getElementById('set-pomo-long').value, 10) || 15;
+      appState.pomodoroSettings.soundAlerts = document.getElementById('set-sound-alerts').checked;
+      appState.pomodoroSettings.browserNotifications = document.getElementById('set-browser-notif').checked;
+
+      if (!timerRuntime.pomoRunning) {
+        setPomodoroMode(timerRuntime.pomoMode);
+      }
+      saveState();
+      showToast('Settings saved successfully!', 'success');
+    }
+
+    function downloadJSONBackup() {
+      const json = JSON.stringify(appState, null, 2);
+      triggerDownload(json, `FocusFlow_Backup_${getLocalDateStr()}.json`, 'application/json');
+      showToast('JSON backup downloaded.', 'success');
+    }
+
+    function restoreJSONBackup(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.sessions)) {
+            throw new Error('Invalid backup format');
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          appState = loadState();
+          timerRuntime.pomoSubjectId = appState.subjects[0]?.id || timerRuntime.pomoSubjectId;
+          timerRuntime.swSubjectId = appState.subjects[0]?.id || timerRuntime.swSubjectId;
+          applyTheme(appState.profile.theme, appState.profile.customAccent);
+          showToast('Backup restored successfully!', 'success');
+          renderView('dashboard');
+        } catch (err) {
+          showToast('Invalid JSON backup file.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleStudyHistory() {
+      if (appState.sessions.some((s) => s.id.startsWith('sample_'))) {
+        showToast('Sample study history is already loaded.', 'info');
+        return;
+      }
+      const today = getLocalDateStr();
+      const subIds = appState.subjects.map((s) => s.id);
+      const sampleSessions = [];
+
+      for (let dayOffset = 0; dayOffset < 21; dayOffset++) {
+        // Skip occasional day for realistic pattern, keep last 7 days active for streak
+        if (dayOffset > 7 && dayOffset % 4 === 0) continue;
+        const dStr = addDays(today, -dayOffset);
+        const sessionsCount = (dayOffset % 3) + 1;
+        for (let s = 0; s < sessionsCount; s++) {
+          const durMin = [25, 45, 50, 60, 90][(dayOffset + s) % 5];
+          const startHour = 9 + s * 3;
+          const startObj = parseLocalDate(dStr);
+          startObj.setHours(startHour, 15, 0, 0);
+          const endObj = new Date(startObj.getTime() + durMin * 60000);
+          sampleSessions.push({
+            id: `sample_${dayOffset}_${s}_${Date.now()}`,
+            date: dStr,
+            startTime: startObj.toISOString(),
+            endTime: endObj.toISOString(),
+            durationSeconds: durMin * 60,
+            subjectId: subIds[(dayOffset + s) % subIds.length],
+            mode: s % 2 === 0 ? 'pomodoro' : 'stopwatch',
+            status: 'completed'
+          });
+        }
+      }
+
+      appState.sessions = [...sampleSessions, ...appState.sessions];
+      const stats = computeStudyStats();
+      checkAchievements(stats);
+      saveState();
+      showToast('Loaded 3 weeks of realistic sample study history!', 'success');
+      renderView('dashboard');
+    }
+
+    function confirmClearAllData() {
+      openModal(
+        'Clear All FocusFlow Data?',
+        `<p class="text-rose-400 font-semibold mb-2">Warning: This action cannot be undone.</p>
+         <p>All study sessions, streaks, achievements, tasks, and custom settings will be permanently wiped from this browser.</p>`,
+        `<button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-bgElevated text-textPrimary text-xs font-semibold">Cancel</button>
+         <button onclick="executeClearAllData()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold">Yes, Wipe Everything</button>`
+      );
+    }
+
+    function executeClearAllData() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState = getDefaultState();
+      timerRuntime.pomoSubjectId = appState.subjects[0]?.id || 'sub_cs';
+      timerRuntime.swSubjectId = appState.subjects[0]?.id || 'sub_cs';
+      applyTheme(appState.profile.theme, null);
+      closeModal();
+      showToast('All data cleared.', 'info');
+      renderView('dashboard');
+    }
+
+    function triggerDownload(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ----------------------------------------------------------------------------
+    // 13. SIDEBAR DRAWER & COLLAPSE INTERACTIONS + INITIALIZATION
+    // ----------------------------------------------------------------------------
+    function initNavigationListeners() {
+      document.querySelectorAll('.nav-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          navigateTo(btn.getAttribute('data-view'));
+        });
+      });
+
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      });
+
+      const closeMobileDrawer = () => {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      };
+      document.getElementById('close-mobile-sidebar')?.addEventListener('click', closeMobileDrawer);
+      backdrop?.addEventListener('click', closeMobileDrawer);
+
+      document.getElementById('collapse-sidebar-btn')?.addEventListener('click', () => {
+        appState.profile.sidebarCollapsed = !appState.profile.sidebarCollapsed;
+        applySidebarCollapseState();
+        saveState();
+      });
+
+      // Close modal on backdrop click
+      document.getElementById('custom-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'custom-modal') closeModal();
+      });
+    }
+
+    function applySidebarCollapseState() {
+      const sidebar = document.getElementById('sidebar');
+      const labels = document.querySelectorAll('.sidebar-label');
+      if (appState.profile.sidebarCollapsed) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-20');
+        labels.forEach((el) => el.classList.add('lg:hidden'));
+      } else {
+        sidebar.classList.add('w-64');
+        sidebar.classList.remove('w-20');
+        labels.forEach((el) => el.classList.remove('lg:hidden'));
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(appState.profile.theme, appState.profile.customAccent);
+      applySidebarCollapseState();
+      initNavigationListeners();
+      startMasterTick();
+      navigateTo('dashboard');
+    });
+  </script>
+</body>
+</html>
